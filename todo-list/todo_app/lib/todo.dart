@@ -13,11 +13,17 @@ class _TodoListState extends State<TodoList> {
   final TextEditingController _textFieldController = TextEditingController();
   final db = FirebaseFirestore.instance;
 
+  Map<String, dynamic> _createTask(Todo task) {
+    return {"name": task.name, "completed": task.completed};
+  }
+
   void _addTodoItem(String name) {
     setState(() {
-      _todos.add(Todo(name: name, completed: false));
-      _seedTodoItems;
-      // call to push to DB
+      var todo = Todo(name: name, completed: false);
+      _todos.add(todo);
+      db.collection("task").add(_createTask(todo)).then(
+          (DocumentReference doc) =>
+              print('DocumentSnapshot added with ID: ${doc.id}'));
     });
     _textFieldController.clear();
   }
@@ -31,13 +37,14 @@ class _TodoListState extends State<TodoList> {
   void _deleteTodo(Todo todo) {
     setState(() {
       _todos.removeWhere((element) => element.name == todo.name);
-      // call to remove from DB
+      // db.collection("task").doc("")
+      // will need the document id to delete, so need a way to read by name
     });
   }
 
   Future<void> _seedTodoItems() async {
     print("jererers");
-    await db.collection("users").get().then((event) {
+    await db.collection("task").get().then((event) {
       for (var doc in event.docs) {
         // _todos.add(Todo(name: doc.data()., completed: completed))
         print("${doc.id} => ${doc.data()}");
