@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:todo_app/navbar.dart';
 import 'rounded_button.dart';
 import 'package:flutter/material.dart';
 
@@ -12,11 +13,11 @@ const kTextFieldDecoration = InputDecoration(
       borderRadius: BorderRadius.all(Radius.circular(32.0)),
     ),
     enabledBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.lightBlueAccent, width: 1.0),
+      borderSide: BorderSide(color: Colors.indigoAccent, width: 1.0),
       borderRadius: BorderRadius.all(Radius.circular(32.0)),
     ),
     focusedBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.lightBlueAccent, width: 2.0),
+      borderSide: BorderSide(color: Colors.indigoAccent, width: 2.0),
       borderRadius: BorderRadius.all(Radius.circular(32.0)),
     ));
 
@@ -34,7 +35,11 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      appBar: const CustomAppBar(
+        title: "Login",
+        backButton: true,
+        pushToWhere: "/",
+      ),
       body: Scaffold(
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -66,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 24.0,
               ),
               RoundedButton(
-                  colour: Colors.lightBlueAccent,
+                  colour: Colors.indigoAccent,
                   title: 'Log In',
                   onPressed: () async {
                     try {

@@ -1,22 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:todo_app/navbar.dart';
 import 'main.dart';
 
 class Settings extends StatelessWidget {
   const Settings({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        title: Text("Settings",
-            style: GoogleFonts.novaMono(color: Colors.indigoAccent)),
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.indigoAccent),
-      ),
-      body: const _Settings(),
+    return const Scaffold(
+      appBar: CustomAppBar(title: "Settings"),
+      body: _Settings(),
     );
   }
 }

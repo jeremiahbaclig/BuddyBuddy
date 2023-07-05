@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:todo_app/navbar.dart';
 
 class TodoList extends StatefulWidget {
   const TodoList({super.key});
@@ -91,6 +92,7 @@ class _TodoListState extends State<TodoList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: const CustomAppBar(title: "Buddy Buddy"),
       body: FutureBuilder(
           future: _seedTodoItems(),
           builder:
