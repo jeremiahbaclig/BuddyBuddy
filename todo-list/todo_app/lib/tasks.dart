@@ -71,11 +71,15 @@ class _TaskListState extends State<TaskList> {
               values.elementAt(keys.toList().indexOf("sharedByUserId"));
         } catch (e) {}
 
-        _tasks.add(Task(
-            name: name,
-            id: id,
-            userId: userId,
-            sharedByUserId: sharedByUserId));
+        if (userId != CurrentUser.getCurrentUser().uid) {
+          continue;
+        } else {
+          _tasks.add(Task(
+              name: name,
+              id: id,
+              userId: userId,
+              sharedByUserId: sharedByUserId));
+        }
       }
     });
 
@@ -105,12 +109,29 @@ class _TaskListState extends State<TaskList> {
             if (snapshot.hasData) {
               return ListView(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                children: _tasks.map((Task task) {
-                  return TaskItem(
-                    task: task,
-                    removeTask: deleteTask,
-                  );
-                }).toList(),
+                children: _tasks
+                        .map((Task task) {
+                          return TaskItem(
+                            task: task,
+                            removeTask: deleteTask,
+                          );
+                        })
+                        .toList()
+                        .isEmpty
+                    ? [
+                        Center(
+                            child: Text(
+                                "Let's start by creating a task list below!",
+                                style: GoogleFonts.novaMono(
+                                  color: Colors.grey,
+                                )))
+                      ]
+                    : _tasks.map((Task task) {
+                        return TaskItem(
+                          task: task,
+                          removeTask: deleteTask,
+                        );
+                      }).toList(),
               );
             } else if (snapshot.hasError) {
               widgetChildren = <Widget>[

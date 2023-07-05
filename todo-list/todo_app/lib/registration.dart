@@ -127,11 +127,13 @@ class _RegisterPageState extends State<RegisterPage> {
                                           .validate()) {
                                         User? user = await Auth
                                             .registerUsingEmailPassword(
-                                          name: _nameTextController.text,
-                                          email: _emailTextController.text,
-                                          password:
-                                              _passwordTextController.text,
-                                        );
+                                                name: _nameTextController.text,
+                                                email:
+                                                    _emailTextController.text,
+                                                password:
+                                                    _passwordTextController
+                                                        .text,
+                                                context: context);
 
                                         setState(() {
                                           _isProcessing = false;

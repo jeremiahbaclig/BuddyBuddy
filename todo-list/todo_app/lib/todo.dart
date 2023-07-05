@@ -137,7 +137,7 @@ class _TodoListState extends State<TodoList> {
                         .isEmpty
                     ? [
                         Center(
-                            child: Text("Let's start by adding a task!",
+                            child: Text("Let's add a task!",
                                 style: GoogleFonts.novaMono(
                                   color: Colors.grey,
                                 )))
