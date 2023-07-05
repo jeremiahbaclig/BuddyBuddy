@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:todo_app/settings.dart';
 
 class SideBar extends StatelessWidget {
   const SideBar({Key? key}) : super(key: key);
@@ -13,10 +12,7 @@ class SideBar extends StatelessWidget {
               leading: const Icon(Icons.settings),
               title: const Text("Settings"),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Settings()),
-                );
+                Navigator.pushNamed(context, 'settings_screen');
               }),
         ],
       ),

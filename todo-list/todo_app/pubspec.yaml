@@ -8,9 +8,11 @@ environment:
 
 dependencies:
   cloud_firestore: ^4.8.2
+  firebase_auth: ^4.6.3
   firebase_core: ^2.14.0
   flutter:
     sdk: flutter
+  google_fonts: ^5.1.0
   provider: ^6.0.5
 
 dev_dependencies:

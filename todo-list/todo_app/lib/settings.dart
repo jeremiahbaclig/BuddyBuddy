@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'main.dart';
 
@@ -8,7 +9,12 @@ class Settings extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Settings"),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        title: Text("Settings",
+            style: GoogleFonts.novaMono(color: Colors.indigoAccent)),
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.indigoAccent),
       ),
       body: const _Settings(),
     );
@@ -37,8 +43,8 @@ class _SettingsState extends State<_Settings> {
                 subtitle: const Text("Change your theme."),
                 trailing: Switch(
                   value: themeMode.darkMode,
-                  activeTrackColor: const Color.fromARGB(255, 89, 216, 255),
-                  activeColor: const Color.fromARGB(255, 78, 76, 175),
+                  activeTrackColor: Colors.indigoAccent,
+                  activeColor: Colors.indigoAccent,
                   onChanged: (value) {
                     themeMode.changeMode();
                   },

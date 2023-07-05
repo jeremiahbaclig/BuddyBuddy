@@ -121,13 +121,14 @@ class _TodoListState extends State<TodoList> {
               ];
             } else {
               widgetChildren = const <Widget>[
-                SizedBox(
-                  width: 60,
-                  height: 60,
-                  child: CircularProgressIndicator(),
+                Center(
+                  child: SizedBox(
+                    width: 60,
+                    height: 60,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
                 ),
-                Padding(
-                  padding: EdgeInsets.only(top: 16),
+                Center(
                   child: Text('Awaiting data...'),
                 ),
               ];
@@ -139,6 +140,7 @@ class _TodoListState extends State<TodoList> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _displayDialog(),
         tooltip: 'Add a task',
+        backgroundColor: Colors.indigoAccent,
         child: const Icon(Icons.add),
       ),
     );
@@ -159,6 +161,8 @@ class _TodoListState extends State<TodoList> {
             content: TextField(
               controller: _textFieldController,
               decoration: const InputDecoration(
+                focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.indigoAccent)),
                 hintText: 'Enter your task',
               ),
               autofocus: true,
@@ -173,10 +177,14 @@ class _TodoListState extends State<TodoList> {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text('Cancel'),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.indigoAccent),
+                ),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.indigoAccent,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -248,7 +256,7 @@ class TodoItem extends StatelessWidget {
         IconButton(
           iconSize: 30,
           icon: const Icon(
-            Icons.delete,
+            Icons.delete_outline_rounded,
             color: Colors.red,
           ),
           alignment: Alignment.centerRight,

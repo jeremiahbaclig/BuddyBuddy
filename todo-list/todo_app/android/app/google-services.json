@@ -14,7 +14,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "705130551844-74h8ntqfshnuj20eklsol3nk46cjbecf.apps.googleusercontent.com",
+          "client_id": "705130551844-r3rvk95vitapu7h5j8ch58jdv6ilbdo9.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -31,10 +31,10 @@
               "client_type": 3
             },
             {
-              "client_id": "705130551844-smaidh6kn3p4ba2n22cdm51dj1o5fksb.apps.googleusercontent.com",
+              "client_id": "705130551844-6p412sihuabjik8nv35ql509reiuds45.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.flutter.todoApp"
+                "bundle_id": "com.example.todoApp.RunnerTests"
               }
             }
           ]
@@ -50,7 +50,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "705130551844-74h8ntqfshnuj20eklsol3nk46cjbecf.apps.googleusercontent.com",
+          "client_id": "705130551844-r3rvk95vitapu7h5j8ch58jdv6ilbdo9.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -67,10 +67,10 @@
               "client_type": 3
             },
             {
-              "client_id": "705130551844-smaidh6kn3p4ba2n22cdm51dj1o5fksb.apps.googleusercontent.com",
+              "client_id": "705130551844-6p412sihuabjik8nv35ql509reiuds45.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.flutter.todoApp"
+                "bundle_id": "com.example.todoApp.RunnerTests"
               }
             }
           ]
