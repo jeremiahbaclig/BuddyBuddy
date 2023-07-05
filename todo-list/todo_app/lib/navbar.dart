@@ -5,9 +5,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool? backButton;
   final String? pushToWhere;
+  final List<Widget>? actionWidgets;
 
   const CustomAppBar(
-      {super.key, required this.title, this.backButton, this.pushToWhere});
+      {super.key,
+      required this.title,
+      this.backButton,
+      this.pushToWhere,
+      this.actionWidgets});
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +36,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       centerTitle: true,
       iconTheme: const IconThemeData(color: Colors.indigoAccent),
+      actions: actionWidgets ?? [],
     );
   }
 

@@ -1,106 +1,97 @@
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:todo_app/navbar.dart';
 import 'package:todo_app/user.dart';
 import 'package:todo_app/utils.dart';
 
-class TodoList extends StatefulWidget {
-  const TodoList({super.key});
+class TaskList extends StatefulWidget {
+  const TaskList({super.key});
 
   @override
-  State<TodoList> createState() => _TodoListState();
+  State<TaskList> createState() => _TaskListState();
 }
 
-class _TodoListState extends State<TodoList> {
-  final List<Todo> _todos = <Todo>[];
+class _TaskListState extends State<TaskList> {
+  final List<Task> _tasks = <Task>[];
   final TextEditingController _textFieldController = TextEditingController();
   final db = FirebaseFirestore.instance;
 
-  Map<String, dynamic> _createTask(Todo task) {
+  Map<String, dynamic> _createTask(Task task) {
     return {
       "name": task.name,
-      "completed": task.completed,
       "id": task.id,
-      "userId": task.userId
+      "userId": task.userId,
+      "sharedByUserId": task.sharedByUserId ?? ""
     };
   }
 
-  void _addTodoItem(String name) {
+  void _addTaskItem(String name) {
     setState(() {
       var newId = Generator.createUniqueId(20);
-      var todo = Todo(
-          name: name,
-          completed: false,
-          id: newId,
-          userId: CurrentUser.getCurrentUser().uid);
-      _todos.add(todo);
+      var task =
+          Task(name: name, id: newId, userId: CurrentUser.getCurrentUser().uid);
+      _tasks.add(task);
 
-      db.collection("todo").doc(todo.id).set(_createTask(todo));
+      db.collection("task").doc(task.id).set(_createTask(task));
     });
     _textFieldController.clear();
   }
 
-  void _handleTodoChange(Todo todo) {
+  void _deleteTask(Task task) {
     setState(() {
-      todo.completed = !todo.completed;
-    });
-  }
-
-  void _deleteTodo(Todo todo) {
-    setState(() {
-      db.collection("todo").doc(todo.id).delete().then(
-            (doc) => print("Deleted todo successfully"),
+      db.collection("task").doc(task.id).delete().then(
+            (doc) => print("Deleted task successfully"),
             onError: (e) => print("Error updating document $e"),
           );
 
-      _todos.removeWhere((element) => element.name == todo.name);
+      _tasks.removeWhere((element) => element.name == task.name);
     });
   }
 
-  Future<List<TodoItem>> _seedTodoItems() async {
-    _todos.clear();
+  Future<List<TaskItem>> _seedTaskItems() async {
+    _tasks.clear();
     await db.collection("task").get().then((event) {
       for (var doc in event.docs) {
         var values = doc.data().values;
         var keys = doc.data().keys;
 
+        dynamic sharedByUserId = null;
         String name = values.elementAt(keys.toList().indexOf('name'));
-        bool completed = values.elementAt(keys.toList().indexOf('completed'));
         String id = values.elementAt(keys.toList().indexOf('id'));
         String userId = values.elementAt(keys.toList().indexOf('userId'));
+        try {
+          sharedByUserId =
+              values.elementAt(keys.toList().indexOf('sharedByUserId'));
+        } catch (e) {}
 
-        _todos.add(
-            Todo(name: name, completed: completed, id: id, userId: userId));
+        _tasks.add(Task(
+            name: name,
+            id: id,
+            userId: userId,
+            sharedByUserId: sharedByUserId));
       }
     });
 
-    return _todos.map((Todo todo) {
-      return TodoItem(
-          todo: todo,
-          onTodoChanged: _handleTodoChange,
-          removeTodo: _deleteTodo);
+    return _tasks.map((Task task) {
+      return TaskItem(task: task, removeTask: _deleteTask);
     }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: "Buddy Buddy"),
       body: FutureBuilder(
-          future: _seedTodoItems(),
+          future: _seedTaskItems(),
           builder:
-              (BuildContext context, AsyncSnapshot<List<TodoItem>> snapshot) {
+              (BuildContext context, AsyncSnapshot<List<TaskItem>> snapshot) {
             List<Widget> widgetChildren;
             if (snapshot.hasData) {
               return ListView(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                children: _todos.map((Todo todo) {
-                  return TodoItem(
-                    todo: todo,
-                    onTodoChanged: _handleTodoChange,
-                    removeTodo: _deleteTodo,
+                children: _tasks.map((Task task) {
+                  return TaskItem(
+                    task: task,
+                    removeTask: _deleteTask,
                   );
                 }).toList(),
               );
@@ -136,7 +127,7 @@ class _TodoListState extends State<TodoList> {
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _displayDialog(),
-        tooltip: 'Add a todo',
+        tooltip: 'Add a task',
         backgroundColor: Colors.indigoAccent,
         child: const Icon(Icons.add),
       ),
@@ -153,14 +144,14 @@ class _TodoListState extends State<TodoList> {
               .copyWith(dialogBackgroundColor: Theme.of(context).canvasColor),
           child: AlertDialog(
             title: const Text(
-              'Add a todo',
+              'Add a task',
             ),
             content: TextField(
               controller: _textFieldController,
               decoration: const InputDecoration(
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.indigoAccent)),
-                hintText: 'Enter your todo',
+                hintText: 'Enter your task',
               ),
               autofocus: true,
             ),
@@ -188,7 +179,7 @@ class _TodoListState extends State<TodoList> {
                 ),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  _addTodoItem(_textFieldController.text);
+                  _addTaskItem(_textFieldController.text);
                 },
                 child: const Text('Add'),
               ),
@@ -200,28 +191,24 @@ class _TodoListState extends State<TodoList> {
   }
 }
 
-class Todo {
-  Todo(
+class Task {
+  Task(
       {required this.name,
-      required this.completed,
       required this.id,
-      required this.userId});
+      required this.userId,
+      this.sharedByUserId});
   String name;
-  bool completed;
   String id;
   String userId;
+  String? sharedByUserId;
 }
 
-class TodoItem extends StatelessWidget {
-  TodoItem(
-      {required this.todo,
-      required this.onTodoChanged,
-      required this.removeTodo})
-      : super(key: ObjectKey(todo));
+class TaskItem extends StatelessWidget {
+  TaskItem({required this.task, required this.removeTask})
+      : super(key: ObjectKey(task));
 
-  final Todo todo;
-  final void Function(Todo todo) onTodoChanged;
-  final void Function(Todo todo) removeTodo;
+  final Task task;
+  final void Function(Task task) removeTask;
 
   TextStyle? _getTextStyle(bool checked) {
     if (!checked) return null;
@@ -235,21 +222,7 @@ class TodoItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      onTap: () {
-        onTodoChanged(todo);
-      },
-      leading: Checkbox(
-        checkColor: Colors.greenAccent,
-        activeColor: Colors.red,
-        value: todo.completed,
-        onChanged: (value) {
-          onTodoChanged(todo);
-        },
-      ),
       title: Row(children: <Widget>[
-        Expanded(
-          child: Text(todo.name, style: _getTextStyle(todo.completed)),
-        ),
         IconButton(
           iconSize: 30,
           icon: const Icon(
@@ -258,7 +231,7 @@ class TodoItem extends StatelessWidget {
           ),
           alignment: Alignment.centerRight,
           onPressed: () {
-            removeTodo(todo);
+            removeTask(task);
           },
         ),
       ]),

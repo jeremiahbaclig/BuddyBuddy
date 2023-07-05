@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class RoundedButton extends StatelessWidget {
   RoundedButton(
-      {required this.colour, required this.title, required this.onPressed});
-  final Color colour;
+      {required this.color, required this.title, required this.onPressed});
+  final Color color;
   final String title;
   final VoidCallback onPressed; // I also changed the type of onPressed here.
 
@@ -13,7 +13,7 @@ class RoundedButton extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: Material(
         elevation: 5.0,
-        color: colour,
+        color: color,
         borderRadius: BorderRadius.circular(30.0),
         child: MaterialButton(
           onPressed: onPressed, // This line was changed.

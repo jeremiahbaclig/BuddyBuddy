@@ -1,89 +1,163 @@
 import 'package:flutter/material.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:todo_app/auth.dart';
 import 'package:todo_app/navbar.dart';
-import 'rounded_button.dart';
+import 'package:todo_app/profile.dart';
+import 'package:todo_app/rounded_button.dart';
+import 'package:todo_app/validator.dart';
 
-//code for designing the UI of our text field where the user writes his email id or password
-
-const kTextFieldDecoration = InputDecoration(
-  hintText: 'Enter a value',
-  hintStyle: TextStyle(color: Colors.grey),
-  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-  border: OutlineInputBorder(
-    borderRadius: BorderRadius.all(Radius.circular(32.0)),
-  ),
-  enabledBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: Colors.indigoAccent, width: 1.0),
-    borderRadius: BorderRadius.all(Radius.circular(32.0)),
-  ),
-  focusedBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: Colors.indigoAccent, width: 2.0),
-    borderRadius: BorderRadius.all(Radius.circular(32.0)),
-  ),
-);
-
-class RegistrationScreen extends StatefulWidget {
+class RegisterPage extends StatefulWidget {
   @override
-  _RegistrationScreenState createState() => _RegistrationScreenState();
+  _RegisterPageState createState() => _RegisterPageState();
 }
 
-class _RegistrationScreenState extends State<RegistrationScreen> {
-  final _auth = FirebaseAuth.instance;
-  late String email = "";
-  late String password = "";
+class _RegisterPageState extends State<RegisterPage> {
+  final _registerFormKey = GlobalKey<FormState>();
+
+  final _nameTextController = TextEditingController();
+  final _emailTextController = TextEditingController();
+  final _passwordTextController = TextEditingController();
+
+  final _focusName = FocusNode();
+  final _focusEmail = FocusNode();
+  final _focusPassword = FocusNode();
+
+  bool _isProcessing = false;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomAppBar(
-          title: "Registration", backButton: true, pushToWhere: "/"),
-      body: Scaffold(
+    return GestureDetector(
+      onTap: () {
+        _focusName.unfocus();
+        _focusEmail.unfocus();
+        _focusPassword.unfocus();
+      },
+      child: Scaffold(
+        appBar: const CustomAppBar(
+          title: "Buddy Buddy",
+          backButton: true,
+          pushToWhere: "/",
+        ),
         body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              TextField(
-                  keyboardType: TextInputType.emailAddress,
-                  textAlign: TextAlign.center,
-                  onChanged: (value) {
-                    email = value;
-                    //Do something with the user input.
-                  },
-                  decoration: kTextFieldDecoration.copyWith(
-                      hintText: 'Enter your email')),
-              const SizedBox(
-                height: 8.0,
-              ),
-              TextField(
-                  obscureText: true,
-                  textAlign: TextAlign.center,
-                  onChanged: (value) {
-                    password = value;
-                    //Do something with the user input.
-                  },
-                  decoration: kTextFieldDecoration.copyWith(
-                      hintText: 'Enter your Password')),
-              const SizedBox(
-                height: 24.0,
-              ),
-              RoundedButton(
-                colour: Colors.indigoAccent,
-                title: 'Register',
-                onPressed: () async {
-                  try {
-                    // final newUser = await _auth.createUserWithEmailAndPassword(
-                    //     email: email, password: password);
-                    if (email != null) {
-                      Navigator.pushNamed(context, 'home_screen');
-                    }
-                  } catch (e) {
-                    print(e);
-                  }
-                },
-              )
-            ],
+          padding: const EdgeInsets.all(24.0),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 24.0),
+                  child: Text(
+                    'Register',
+                    style:
+                        GoogleFonts.novaMono(color: Colors.grey, fontSize: 24),
+                  ),
+                ),
+                Form(
+                  key: _registerFormKey,
+                  child: Column(
+                    children: <Widget>[
+                      TextFormField(
+                        controller: _nameTextController,
+                        focusNode: _focusName,
+                        validator: (value) => Validator.validateName(
+                          name: value!,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: "Name",
+                          errorBorder: UnderlineInputBorder(
+                            borderRadius: BorderRadius.circular(6.0),
+                            borderSide: const BorderSide(
+                              color: Colors.red,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16.0),
+                      TextFormField(
+                        controller: _emailTextController,
+                        focusNode: _focusEmail,
+                        validator: (value) => Validator.validateEmail(
+                          email: value!,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: "Email",
+                          errorBorder: UnderlineInputBorder(
+                            borderRadius: BorderRadius.circular(6.0),
+                            borderSide: const BorderSide(
+                              color: Colors.red,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16.0),
+                      TextFormField(
+                        controller: _passwordTextController,
+                        focusNode: _focusPassword,
+                        obscureText: true,
+                        validator: (value) => Validator.validatePassword(
+                          password: value!,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: "Password",
+                          errorBorder: UnderlineInputBorder(
+                            borderRadius: BorderRadius.circular(6.0),
+                            borderSide: const BorderSide(
+                              color: Colors.red,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 32.0),
+                      _isProcessing
+                          ? const CircularProgressIndicator()
+                          : Row(
+                              children: [
+                                Expanded(
+                                  child: RoundedButton(
+                                    title: "Sign Up",
+                                    color: Colors.indigoAccent,
+                                    onPressed: () async {
+                                      setState(() {
+                                        _isProcessing = true;
+                                      });
+
+                                      if (_registerFormKey.currentState!
+                                          .validate()) {
+                                        User? user = await Auth
+                                            .registerUsingEmailPassword(
+                                          name: _nameTextController.text,
+                                          email: _emailTextController.text,
+                                          password:
+                                              _passwordTextController.text,
+                                        );
+
+                                        setState(() {
+                                          _isProcessing = false;
+                                        });
+
+                                        if (user != null) {
+                                          Navigator.of(context)
+                                              .pushAndRemoveUntil(
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ProfilePage(user: user),
+                                            ),
+                                            ModalRoute.withName('/'),
+                                          );
+                                        }
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ],
+                            )
+                    ],
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),

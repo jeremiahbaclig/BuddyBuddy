@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/firebase_options.dart';
+import 'package:todo_app/home.dart';
 import 'package:todo_app/login.dart';
 import 'package:todo_app/navbar.dart';
+import 'package:todo_app/profile.dart';
 import 'package:todo_app/registration.dart';
 import 'package:todo_app/settings.dart';
 import 'package:todo_app/side_bar.dart';
@@ -46,9 +48,9 @@ class _TodoAppState extends State<TodoApp> {
         drawer: const SideBar(),
       ),
       routes: {
-        'registration_screen': (context) => RegistrationScreen(),
-        'login_screen': (context) => LoginScreen(),
-        'home_screen': (context) => const TodoList(),
+        'registration_screen': (context) => RegisterPage(),
+        'login_screen': (context) => LoginPage(),
+        'home_screen': (context) => const HomeScreen(),
         'settings_screen': (context) => const Settings(),
       },
       onUnknownRoute: (RouteSettings settings) {
