@@ -6,8 +6,17 @@ import 'package:todo_app/navbar.dart';
 import 'package:todo_app/user.dart';
 import 'package:todo_app/utils.dart';
 
+class TaskHolder {
+  final String taskId;
+  final String taskName;
+
+  TaskHolder(this.taskId, this.taskName);
+}
+
 class TodoList extends StatefulWidget {
-  const TodoList({super.key});
+  final TaskHolder taskIdHolder;
+
+  const TodoList({Key? key, required this.taskIdHolder}) : super(key: key);
 
   @override
   State<TodoList> createState() => _TodoListState();
@@ -18,12 +27,13 @@ class _TodoListState extends State<TodoList> {
   final TextEditingController _textFieldController = TextEditingController();
   final db = FirebaseFirestore.instance;
 
-  Map<String, dynamic> _createTask(Todo task) {
+  Map<String, dynamic> _createTask(Todo todo) {
     return {
-      "name": task.name,
-      "completed": task.completed,
-      "id": task.id,
-      "userId": task.userId
+      "name": todo.name,
+      "completed": todo.completed,
+      "id": todo.id,
+      "userId": todo.userId,
+      "taskId": todo.taskId
     };
   }
 
@@ -34,7 +44,8 @@ class _TodoListState extends State<TodoList> {
           name: name,
           completed: false,
           id: newId,
-          userId: CurrentUser.getCurrentUser().uid);
+          userId: CurrentUser.getCurrentUser().uid,
+          taskId: widget.taskIdHolder.taskId);
       _todos.add(todo);
 
       db.collection("todo").doc(todo.id).set(_createTask(todo));
@@ -61,7 +72,7 @@ class _TodoListState extends State<TodoList> {
 
   Future<List<TodoItem>> _seedTodoItems() async {
     _todos.clear();
-    await db.collection("task").get().then((event) {
+    await db.collection("todo").get().then((event) {
       for (var doc in event.docs) {
         var values = doc.data().values;
         var keys = doc.data().keys;
@@ -70,9 +81,18 @@ class _TodoListState extends State<TodoList> {
         bool completed = values.elementAt(keys.toList().indexOf('completed'));
         String id = values.elementAt(keys.toList().indexOf('id'));
         String userId = values.elementAt(keys.toList().indexOf('userId'));
+        String taskId = values.elementAt(keys.toList().indexOf('taskId'));
 
-        _todos.add(
-            Todo(name: name, completed: completed, id: id, userId: userId));
+        if (userId != CurrentUser.getCurrentUser().uid &&
+            taskId != widget.taskIdHolder.taskId) {
+          continue;
+        } else {}
+        _todos.add(Todo(
+            name: name,
+            completed: completed,
+            id: id,
+            userId: userId,
+            taskId: taskId));
       }
     });
 
@@ -87,7 +107,11 @@ class _TodoListState extends State<TodoList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: "Buddy Buddy"),
+      appBar: CustomAppBar(
+        title: widget.taskIdHolder.taskName,
+        backButton: true,
+        pushToWhere: "home_screen",
+      ),
       body: FutureBuilder(
           future: _seedTodoItems(),
           builder:
@@ -205,11 +229,13 @@ class Todo {
       {required this.name,
       required this.completed,
       required this.id,
-      required this.userId});
+      required this.userId,
+      required this.taskId});
   String name;
   bool completed;
   String id;
   String userId;
+  String taskId;
 }
 
 class TodoItem extends StatelessWidget {

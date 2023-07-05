@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:todo_app/navbar.dart';
+import 'package:todo_app/todo.dart';
 import 'package:todo_app/user.dart';
 import 'package:todo_app/utils.dart';
 
@@ -80,6 +82,12 @@ class _TaskListState extends State<TaskList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        title: Text('My Tasks',
+            style: GoogleFonts.novaMono(color: Colors.blueGrey, fontSize: 18)),
+        backgroundColor: Colors.transparent,
+      ),
       body: FutureBuilder(
           future: _seedTaskItems(),
           builder:
@@ -127,7 +135,7 @@ class _TaskListState extends State<TaskList> {
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _displayDialog(),
-        tooltip: 'Add a task',
+        tooltip: 'Add a list A task',
         backgroundColor: Colors.indigoAccent,
         child: const Icon(Icons.add),
       ),
@@ -144,14 +152,14 @@ class _TaskListState extends State<TaskList> {
               .copyWith(dialogBackgroundColor: Theme.of(context).canvasColor),
           child: AlertDialog(
             title: const Text(
-              'Add a task',
+              'Create a list of tasks',
             ),
             content: TextField(
               controller: _textFieldController,
               decoration: const InputDecoration(
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.indigoAccent)),
-                hintText: 'Enter your task',
+                hintText: 'Type here',
               ),
               autofocus: true,
             ),
@@ -210,28 +218,62 @@ class TaskItem extends StatelessWidget {
   final Task task;
   final void Function(Task task) removeTask;
 
-  TextStyle? _getTextStyle(bool checked) {
-    if (!checked) return null;
-
-    return const TextStyle(
-      color: Colors.black54,
-      decoration: TextDecoration.lineThrough,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return ListTile(
       title: Row(children: <Widget>[
-        IconButton(
-          iconSize: 30,
-          icon: const Icon(
-            Icons.delete_outline_rounded,
-            color: Colors.red,
-          ),
-          alignment: Alignment.centerRight,
-          onPressed: () {
-            removeTask(task);
+        Expanded(
+          child: Text(task.name,
+              style: GoogleFonts.novaMono(
+                  color: Colors.blueGrey,
+                  fontSize: 14,
+                  fontStyle: FontStyle.italic)),
+        ),
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert_rounded),
+          itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+            PopupMenuItem<String>(
+              value: 'editTask',
+              child: RichText(
+                text: const TextSpan(
+                  children: [
+                    TextSpan(
+                      text: "Edit ",
+                    ),
+                    WidgetSpan(
+                      child: Icon(Icons.mode_edit_outlined, size: 14),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            PopupMenuItem<String>(
+              value: 'deleteTask',
+              child: RichText(
+                text: const TextSpan(
+                  children: [
+                    TextSpan(
+                      text: "Delete ",
+                    ),
+                    WidgetSpan(
+                      child: Icon(Icons.restore_from_trash_rounded, size: 14),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+          onSelected: (String value) {
+            if (value == 'editTask') {
+              TaskHolder taskIdHolder = TaskHolder(task.id, task.name);
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => TodoList(taskIdHolder: taskIdHolder),
+                ),
+              );
+            } else if (value == 'deleteTask') {
+              removeTask(task);
+            }
           },
         ),
       ]),
