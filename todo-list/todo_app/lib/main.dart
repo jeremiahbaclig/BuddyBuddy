@@ -67,7 +67,7 @@ class _TodoAppState extends State<TodoApp> {
 } // ʕ •ᴥ•ʔ
 
 class DarkMode with ChangeNotifier {
-  bool darkMode = false;
+  bool darkMode = true;
 
   changeMode() {
     darkMode = !darkMode;

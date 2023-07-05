@@ -6,13 +6,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool? backButton;
   final String? pushToWhere;
   final List<Widget>? actionWidgets;
+  final Color? customColor;
+  final double? fontSize;
 
   const CustomAppBar(
       {super.key,
       required this.title,
       this.backButton,
       this.pushToWhere,
-      this.actionWidgets});
+      this.actionWidgets,
+      this.customColor,
+      this.fontSize});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +36,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Colors.transparent,
       title: Text(
         title,
-        style: GoogleFonts.novaMono(color: Colors.indigoAccent),
+        style: GoogleFonts.novaMono(
+            color: customColor ?? Colors.indigoAccent,
+            fontSize: fontSize ?? 20),
       ),
       centerTitle: true,
       iconTheme: const IconThemeData(color: Colors.indigoAccent),

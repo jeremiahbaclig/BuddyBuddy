@@ -1,13 +1,17 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:todo_app/navbar.dart';
-import 'package:todo_app/todo.dart';
-import 'package:todo_app/user.dart';
-import 'package:todo_app/utils.dart';
+import "package:cloud_firestore/cloud_firestore.dart";
+import "package:flutter/material.dart";
+import "package:google_fonts/google_fonts.dart";
+import "package:todo_app/navbar.dart";
+import "package:todo_app/rounded_button.dart";
+import "package:todo_app/todo.dart";
+import "package:todo_app/user.dart";
+import "package:todo_app/utils.dart";
+
+typedef TaskDeleteCallback = void Function(Task task);
 
 class TaskList extends StatefulWidget {
-  const TaskList({super.key});
+  const TaskList({super.key, required this.onDeleteTask});
+  final TaskDeleteCallback onDeleteTask;
 
   @override
   State<TaskList> createState() => _TaskListState();
@@ -39,7 +43,7 @@ class _TaskListState extends State<TaskList> {
     _textFieldController.clear();
   }
 
-  void _deleteTask(Task task) {
+  void deleteTask(Task task) {
     setState(() {
       db.collection("task").doc(task.id).delete().then(
             (doc) => print("Deleted task successfully"),
@@ -47,6 +51,7 @@ class _TaskListState extends State<TaskList> {
           );
 
       _tasks.removeWhere((element) => element.name == task.name);
+      widget.onDeleteTask(task);
     });
   }
 
@@ -58,12 +63,12 @@ class _TaskListState extends State<TaskList> {
         var keys = doc.data().keys;
 
         dynamic sharedByUserId = null;
-        String name = values.elementAt(keys.toList().indexOf('name'));
-        String id = values.elementAt(keys.toList().indexOf('id'));
-        String userId = values.elementAt(keys.toList().indexOf('userId'));
+        String name = values.elementAt(keys.toList().indexOf("name"));
+        String id = values.elementAt(keys.toList().indexOf("id"));
+        String userId = values.elementAt(keys.toList().indexOf("userId"));
         try {
           sharedByUserId =
-              values.elementAt(keys.toList().indexOf('sharedByUserId'));
+              values.elementAt(keys.toList().indexOf("sharedByUserId"));
         } catch (e) {}
 
         _tasks.add(Task(
@@ -75,7 +80,7 @@ class _TaskListState extends State<TaskList> {
     });
 
     return _tasks.map((Task task) {
-      return TaskItem(task: task, removeTask: _deleteTask);
+      return TaskItem(task: task, removeTask: deleteTask);
     }).toList();
   }
 
@@ -84,8 +89,12 @@ class _TaskListState extends State<TaskList> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text('My Tasks',
-            style: GoogleFonts.novaMono(color: Colors.blueGrey, fontSize: 18)),
+        title: Text("My Tasks",
+            style: GoogleFonts.novaMono(
+              color: Colors.grey,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            )),
         backgroundColor: Colors.transparent,
       ),
       body: FutureBuilder(
@@ -99,7 +108,7 @@ class _TaskListState extends State<TaskList> {
                 children: _tasks.map((Task task) {
                   return TaskItem(
                     task: task,
-                    removeTask: _deleteTask,
+                    removeTask: deleteTask,
                   );
                 }).toList(),
               );
@@ -107,12 +116,12 @@ class _TaskListState extends State<TaskList> {
               widgetChildren = <Widget>[
                 const Icon(
                   Icons.error_outline,
-                  color: Colors.red,
+                  color: Color.fromARGB(255, 178, 38, 83),
                   size: 60,
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
-                  child: Text('Error: ${snapshot.error}'),
+                  child: Text("Error: ${snapshot.error}"),
                 ),
               ];
             } else {
@@ -125,7 +134,7 @@ class _TaskListState extends State<TaskList> {
                   ),
                 ),
                 Center(
-                  child: Text('Awaiting data...'),
+                  child: Text("Awaiting data..."),
                 ),
               ];
             }
@@ -135,7 +144,7 @@ class _TaskListState extends State<TaskList> {
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _displayDialog(),
-        tooltip: 'Add a list A task',
+        tooltip: "Add a list of tasks",
         backgroundColor: Colors.indigoAccent,
         child: const Icon(Icons.add),
       ),
@@ -151,21 +160,24 @@ class _TaskListState extends State<TaskList> {
           data: Theme.of(context)
               .copyWith(dialogBackgroundColor: Theme.of(context).canvasColor),
           child: AlertDialog(
-            title: const Text(
-              'Create a list of tasks',
+            title: Text(
+              "Create a list of tasks",
+              style: GoogleFonts.novaMono(color: Colors.black87),
             ),
             content: TextField(
               controller: _textFieldController,
               decoration: const InputDecoration(
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.indigoAccent)),
-                hintText: 'Type here',
+                hintText: "Type here",
               ),
               autofocus: true,
+              style: GoogleFonts.novaMono(color: Colors.black87),
             ),
             actions: <Widget>[
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 178, 38, 83),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -173,9 +185,9 @@ class _TaskListState extends State<TaskList> {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text(
-                  'Cancel',
-                  style: TextStyle(color: Colors.indigoAccent),
+                child: Text(
+                  "Cancel",
+                  style: GoogleFonts.novaMono(color: Colors.white),
                 ),
               ),
               ElevatedButton(
@@ -189,7 +201,8 @@ class _TaskListState extends State<TaskList> {
                   Navigator.of(context).pop();
                   _addTaskItem(_textFieldController.text);
                 },
-                child: const Text('Add'),
+                child: Text("Create",
+                    style: GoogleFonts.novaMono(color: Colors.white)),
               ),
             ],
           ),
@@ -218,6 +231,38 @@ class TaskItem extends StatelessWidget {
   final Task task;
   final void Function(Task task) removeTask;
 
+  showAlertDialog(BuildContext context, Task task) {
+    Widget cancelButton = RoundedButton(
+      title: "Back",
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+      color: Colors.indigoAccent,
+    );
+    Widget continueButton = RoundedButton(
+      title: "Delete",
+      onPressed: () {
+        removeTask(task);
+        Navigator.of(context).pop();
+      },
+      color: const Color.fromARGB(255, 178, 38, 83),
+    );
+    AlertDialog alert = AlertDialog(
+      title: Text("Are you sure?",
+          style: GoogleFonts.novaMono(color: Colors.grey)),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -225,37 +270,39 @@ class TaskItem extends StatelessWidget {
         Expanded(
           child: Text(task.name,
               style: GoogleFonts.novaMono(
-                  color: Colors.blueGrey,
+                  color: Colors.grey,
                   fontSize: 14,
-                  fontStyle: FontStyle.italic)),
+                  fontWeight: FontWeight.w600)),
         ),
         PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert_rounded),
           itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
             PopupMenuItem<String>(
-              value: 'editTask',
+              value: "editTask",
               child: RichText(
-                text: const TextSpan(
+                text: TextSpan(
                   children: [
                     TextSpan(
-                      text: "Edit ",
+                      text: "Let's go! ",
+                      style: GoogleFonts.novaMono(color: Colors.grey),
                     ),
-                    WidgetSpan(
-                      child: Icon(Icons.mode_edit_outlined, size: 14),
+                    const WidgetSpan(
+                      child: Icon(Icons.arrow_forward_rounded, size: 14),
                     ),
                   ],
                 ),
               ),
             ),
             PopupMenuItem<String>(
-              value: 'deleteTask',
+              value: "deleteTask",
               child: RichText(
-                text: const TextSpan(
+                text: TextSpan(
                   children: [
                     TextSpan(
                       text: "Delete ",
+                      style: GoogleFonts.novaMono(color: Colors.grey),
                     ),
-                    WidgetSpan(
+                    const WidgetSpan(
                       child: Icon(Icons.restore_from_trash_rounded, size: 14),
                     ),
                   ],
@@ -264,15 +311,15 @@ class TaskItem extends StatelessWidget {
             ),
           ],
           onSelected: (String value) {
-            if (value == 'editTask') {
+            if (value == "editTask") {
               TaskHolder taskIdHolder = TaskHolder(task.id, task.name);
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
                   builder: (context) => TodoList(taskIdHolder: taskIdHolder),
                 ),
               );
-            } else if (value == 'deleteTask') {
-              removeTask(task);
+            } else if (value == "deleteTask") {
+              showAlertDialog(context, task);
             }
           },
         ),

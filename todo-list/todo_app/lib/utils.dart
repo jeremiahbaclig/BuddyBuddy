@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:flutter/material.dart';
+
 class Generator {
   static String createUniqueId(int length) {
     const chars =

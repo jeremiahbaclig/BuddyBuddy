@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:todo_app/navbar.dart';
 import 'package:todo_app/user.dart';
 import 'package:todo_app/utils.dart';
@@ -83,16 +84,18 @@ class _TodoListState extends State<TodoList> {
         String userId = values.elementAt(keys.toList().indexOf('userId'));
         String taskId = values.elementAt(keys.toList().indexOf('taskId'));
 
-        if (userId != CurrentUser.getCurrentUser().uid &&
-            taskId != widget.taskIdHolder.taskId) {
+        if (userId != CurrentUser.getCurrentUser().uid) {
           continue;
-        } else {}
-        _todos.add(Todo(
-            name: name,
-            completed: completed,
-            id: id,
-            userId: userId,
-            taskId: taskId));
+        } else if (taskId != widget.taskIdHolder.taskId) {
+          continue;
+        } else {
+          _todos.add(Todo(
+              name: name,
+              completed: completed,
+              id: id,
+              userId: userId,
+              taskId: taskId));
+        }
       }
     });
 
@@ -109,6 +112,8 @@ class _TodoListState extends State<TodoList> {
     return Scaffold(
       appBar: CustomAppBar(
         title: widget.taskIdHolder.taskName,
+        customColor: Colors.grey,
+        fontSize: 18,
         backButton: true,
         pushToWhere: "home_screen",
       ),
@@ -120,19 +125,36 @@ class _TodoListState extends State<TodoList> {
             if (snapshot.hasData) {
               return ListView(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                children: _todos.map((Todo todo) {
-                  return TodoItem(
-                    todo: todo,
-                    onTodoChanged: _handleTodoChange,
-                    removeTodo: _deleteTodo,
-                  );
-                }).toList(),
+                children: _todos
+                        .map((Todo todo) {
+                          return TodoItem(
+                            todo: todo,
+                            onTodoChanged: _handleTodoChange,
+                            removeTodo: _deleteTodo,
+                          );
+                        })
+                        .toList()
+                        .isEmpty
+                    ? [
+                        Center(
+                            child: Text("Let's start by adding a task!",
+                                style: GoogleFonts.novaMono(
+                                  color: Colors.grey,
+                                )))
+                      ]
+                    : _todos.map((Todo todo) {
+                        return TodoItem(
+                          todo: todo,
+                          onTodoChanged: _handleTodoChange,
+                          removeTodo: _deleteTodo,
+                        );
+                      }).toList(),
               );
             } else if (snapshot.hasError) {
               widgetChildren = <Widget>[
                 const Icon(
                   Icons.error_outline,
-                  color: Colors.red,
+                  color: Color.fromARGB(255, 178, 38, 83),
                   size: 60,
                 ),
                 Padding(
@@ -176,8 +198,9 @@ class _TodoListState extends State<TodoList> {
           data: Theme.of(context)
               .copyWith(dialogBackgroundColor: Theme.of(context).canvasColor),
           child: AlertDialog(
-            title: const Text(
+            title: Text(
               'Add a todo',
+              style: GoogleFonts.novaMono(color: Colors.black87),
             ),
             content: TextField(
               controller: _textFieldController,
@@ -187,10 +210,12 @@ class _TodoListState extends State<TodoList> {
                 hintText: 'Enter your todo',
               ),
               autofocus: true,
+              style: GoogleFonts.novaMono(color: Colors.black87),
             ),
             actions: <Widget>[
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 178, 38, 83),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -198,9 +223,9 @@ class _TodoListState extends State<TodoList> {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text(
+                child: Text(
                   'Cancel',
-                  style: TextStyle(color: Colors.indigoAccent),
+                  style: GoogleFonts.novaMono(color: Colors.white),
                 ),
               ),
               ElevatedButton(
@@ -214,7 +239,8 @@ class _TodoListState extends State<TodoList> {
                   Navigator.of(context).pop();
                   _addTodoItem(_textFieldController.text);
                 },
-                child: const Text('Add'),
+                child: Text('Add',
+                    style: GoogleFonts.novaMono(color: Colors.white)),
               ),
             ],
           ),
@@ -250,7 +276,7 @@ class TodoItem extends StatelessWidget {
   final void Function(Todo todo) removeTodo;
 
   TextStyle? _getTextStyle(bool checked) {
-    if (!checked) return null;
+    if (!checked) return GoogleFonts.novaMono(color: Colors.grey);
 
     return const TextStyle(
       color: Colors.black54,
@@ -266,7 +292,7 @@ class TodoItem extends StatelessWidget {
       },
       leading: Checkbox(
         checkColor: Colors.greenAccent,
-        activeColor: Colors.red,
+        activeColor: const Color.fromARGB(255, 178, 38, 83),
         value: todo.completed,
         onChanged: (value) {
           onTodoChanged(todo);
@@ -280,7 +306,7 @@ class TodoItem extends StatelessWidget {
           iconSize: 30,
           icon: const Icon(
             Icons.delete_outline_rounded,
-            color: Colors.red,
+            color: Color.fromARGB(255, 178, 38, 83),
           ),
           alignment: Alignment.centerRight,
           onPressed: () {

@@ -76,6 +76,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         drawer: const SideBar(),
-        body: const TaskList());
+        body: TaskList(
+          onDeleteTask: (Task task) {},
+        ));
   }
 }

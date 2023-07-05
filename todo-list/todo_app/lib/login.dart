@@ -87,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
                               errorBorder: UnderlineInputBorder(
                                 borderRadius: BorderRadius.circular(6.0),
                                 borderSide: const BorderSide(
-                                  color: Colors.red,
+                                  color: Color.fromARGB(255, 178, 38, 83),
                                 ),
                               ),
                             ),
@@ -105,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
                               errorBorder: UnderlineInputBorder(
                                 borderRadius: BorderRadius.circular(6.0),
                                 borderSide: const BorderSide(
-                                  color: Colors.red,
+                                  color: Color.fromARGB(255, 178, 38, 83),
                                 ),
                               ),
                             ),
