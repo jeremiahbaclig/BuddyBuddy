@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -13,17 +15,32 @@ class _TodoListState extends State<TodoList> {
   final TextEditingController _textFieldController = TextEditingController();
   final db = FirebaseFirestore.instance;
 
+  get _createUniqueId {
+    const _chars =
+        'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+    Random _rnd = Random();
+
+    return String.fromCharCodes(Iterable.generate(
+        20, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
+  }
+
   Map<String, dynamic> _createTask(Todo task) {
-    return {"name": task.name, "completed": task.completed};
+    return {
+      "name": task.name,
+      "completed": task.completed,
+      "id": task.id,
+      "userId": task.userId
+    };
   }
 
   void _addTodoItem(String name) {
     setState(() {
-      var todo = Todo(name: name, completed: false);
+      var newId = _createUniqueId;
+      var todo =
+          Todo(name: name, completed: false, id: newId, userId: "TO_CREATE");
       _todos.add(todo);
-      db.collection("task").add(_createTask(todo)).then(
-          (DocumentReference doc) =>
-              print('DocumentSnapshot added with ID: ${doc.id}'));
+
+      db.collection("task").doc(todo.id).set(_createTask(todo));
     });
     _textFieldController.clear();
   }
@@ -36,34 +53,89 @@ class _TodoListState extends State<TodoList> {
 
   void _deleteTodo(Todo todo) {
     setState(() {
+      db.collection("task").doc(todo.id).delete().then(
+            (doc) => print("Deleted task successfully"),
+            onError: (e) => print("Error updating document $e"),
+          );
+
       _todos.removeWhere((element) => element.name == todo.name);
-      // db.collection("task").doc("")
-      // will need the document id to delete, so need a way to read by name
     });
   }
 
-  Future<void> _seedTodoItems() async {
-    print("jererers");
+  Future<List<TodoItem>> _seedTodoItems() async {
+    _todos.clear();
     await db.collection("task").get().then((event) {
       for (var doc in event.docs) {
-        // _todos.add(Todo(name: doc.data()., completed: completed))
-        print("${doc.id} => ${doc.data()}");
+        var values = doc.data().values;
+        var keys = doc.data().keys;
+
+        String name = values.elementAt(keys.toList().indexOf('name'));
+        bool completed = values.elementAt(keys.toList().indexOf('completed'));
+        String id = values.elementAt(keys.toList().indexOf('id'));
+        String userId = values.elementAt(keys.toList().indexOf('userId'));
+
+        print("$name $completed $id");
+        _todos.add(
+            Todo(name: name, completed: completed, id: id, userId: userId));
       }
     });
+
+    return _todos.map((Todo todo) {
+      return TodoItem(
+          todo: todo,
+          onTodoChanged: _handleTodoChange,
+          removeTodo: _deleteTodo);
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        children: _todos.map((Todo todo) {
-          return TodoItem(
-              todo: todo,
-              onTodoChanged: _handleTodoChange,
-              removeTodo: _deleteTodo);
-        }).toList(),
-      ),
+      body: FutureBuilder(
+          future: _seedTodoItems(),
+          builder:
+              (BuildContext context, AsyncSnapshot<List<TodoItem>> snapshot) {
+            List<Widget> widgetChildren;
+            if (snapshot.hasData) {
+              return ListView(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                children: _todos.map((Todo todo) {
+                  return TodoItem(
+                    todo: todo,
+                    onTodoChanged: _handleTodoChange,
+                    removeTodo: _deleteTodo,
+                  );
+                }).toList(),
+              );
+            } else if (snapshot.hasError) {
+              widgetChildren = <Widget>[
+                const Icon(
+                  Icons.error_outline,
+                  color: Colors.red,
+                  size: 60,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Text('Error: ${snapshot.error}'),
+                ),
+              ];
+            } else {
+              widgetChildren = const <Widget>[
+                SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: CircularProgressIndicator(),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 16),
+                  child: Text('Awaiting data...'),
+                ),
+              ];
+            }
+            return Column(
+              children: widgetChildren,
+            );
+          }),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _displayDialog(),
         tooltip: 'Add a task',
@@ -124,9 +196,15 @@ class _TodoListState extends State<TodoList> {
 }
 
 class Todo {
-  Todo({required this.name, required this.completed});
+  Todo(
+      {required this.name,
+      required this.completed,
+      required this.id,
+      required this.userId});
   String name;
   bool completed;
+  String id;
+  String userId;
 }
 
 class TodoItem extends StatelessWidget {
