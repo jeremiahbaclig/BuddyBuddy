@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:todo_app/auth/auth.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/pages/navbar.dart';
@@ -46,13 +47,35 @@ class _HomeScreenState extends State<HomeScreen> {
             PopupMenuButton<String>(
               icon: const Icon(Icons.person_outlined),
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                const PopupMenuItem<String>(
+                PopupMenuItem<String>(
                   value: 'myUser',
-                  child: Text('My User'),
+                  child: RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                            text: "My User ",
+                            style: GoogleFonts.novaMono(color: Colors.grey)),
+                        const WidgetSpan(
+                          child: Icon(Icons.person_outline_rounded, size: 14),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                const PopupMenuItem<String>(
+                PopupMenuItem<String>(
                   value: 'logOut',
-                  child: Text('Log Out'),
+                  child: RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                            text: "Log Out ",
+                            style: GoogleFonts.novaMono(color: Colors.grey)),
+                        const WidgetSpan(
+                          child: Icon(Icons.login_rounded, size: 14),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
               onSelected: (String value) {

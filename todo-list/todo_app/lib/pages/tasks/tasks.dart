@@ -1,12 +1,15 @@
 import "package:cloud_firestore/cloud_firestore.dart";
+import 'package:firebase_auth/firebase_auth.dart';
 import "package:flutter/material.dart";
 import "package:google_fonts/google_fonts.dart";
+import 'package:share_plus/share_plus.dart';
 import 'package:todo_app/utils/animations.dart';
 import 'package:todo_app/pages/navbar.dart';
 import 'package:todo_app/utils/rounded_button.dart';
 import 'package:todo_app/pages/tasks/todo.dart';
 import 'package:todo_app/auth/user.dart';
 import 'package:todo_app/utils/utils.dart';
+import 'package:todo_app/utils/validator.dart';
 
 typedef TaskDeleteCallback = void Function(Task task);
 
@@ -23,20 +26,25 @@ class _TaskListState extends State<TaskList> {
   final TextEditingController _textFieldController = TextEditingController();
   final db = FirebaseFirestore.instance;
 
-  Map<String, dynamic> _createTask(Task task) {
+  static Map<String, dynamic> _createTask(Task task) {
     return {
       "name": task.name,
       "id": task.id,
       "userId": task.userId,
-      "sharedByUserId": task.sharedByUserId ?? ""
+      "sharedByUserId": task.sharedByUserId ?? "",
+      "emails": task.emails
     };
   }
 
   void _addTaskItem(String name) {
     setState(() {
       var newId = Generator.createUniqueId(20);
-      var task =
-          Task(name: name, id: newId, userId: CurrentUser.getCurrentUser().uid);
+      var task = Task(
+          name: name,
+          id: newId,
+          userId: CurrentUser.getCurrentUser().uid,
+          emails:
+              List.generate(1, (index) => CurrentUser.getCurrentUser().email!));
       _tasks.add(task);
 
       db.collection("task").doc(task.id).set(_createTask(task));
@@ -57,6 +65,7 @@ class _TaskListState extends State<TaskList> {
   }
 
   Future<List<TaskItem>> _seedTaskItems() async {
+    var currentUser = CurrentUser.getCurrentUser();
     _tasks.clear();
     await db.collection("task").get().then((event) {
       for (var doc in event.docs) {
@@ -71,15 +80,20 @@ class _TaskListState extends State<TaskList> {
           sharedByUserId =
               values.elementAt(keys.toList().indexOf("sharedByUserId"));
         } catch (e) {}
+        List<dynamic> emails =
+            values.elementAt(keys.toList().indexOf("emails"));
 
-        if (userId != CurrentUser.getCurrentUser().uid) {
+        if (userId != currentUser.uid) {
+          continue;
+        } else if (!(emails.contains(currentUser.email))) {
           continue;
         } else {
           _tasks.add(Task(
               name: name,
               id: id,
               userId: userId,
-              sharedByUserId: sharedByUserId));
+              sharedByUserId: sharedByUserId,
+              emails: emails));
         }
       }
     });
@@ -94,7 +108,7 @@ class _TaskListState extends State<TaskList> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text("My Tasks",
+        title: Text("${CurrentUser.getCurrentUser().displayName}'s Tasks",
             style: GoogleFonts.novaMono(
               color: Colors.grey,
               fontSize: 18,
@@ -234,11 +248,13 @@ class Task {
       {required this.name,
       required this.id,
       required this.userId,
-      this.sharedByUserId});
+      this.sharedByUserId,
+      required this.emails});
   String name;
   String id;
   String userId;
   String? sharedByUserId;
+  List<dynamic> emails;
 }
 
 class TaskItem extends StatelessWidget {
@@ -247,6 +263,8 @@ class TaskItem extends StatelessWidget {
 
   final Task task;
   final void Function(Task task) removeTask;
+  final TextEditingController _textFieldController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   showAlertDialog(BuildContext context, Task task) {
     Widget cancelButton = RoundedButton(
@@ -276,6 +294,103 @@ class TaskItem extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return alert;
+      },
+    );
+  }
+
+  Future<void> shareTaskDialog(BuildContext context, Task task) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Theme(
+          data: Theme.of(context)
+              .copyWith(dialogBackgroundColor: Theme.of(context).canvasColor),
+          child: AlertDialog(
+            title: Text(
+              'Share this task list',
+              style: GoogleFonts.novaMono(color: Colors.black87),
+            ),
+            content: Form(
+              key: _formKey,
+              child: TextFormField(
+                controller: _textFieldController,
+                validator: (value) => Validator.validateEmail(email: value!),
+                decoration: const InputDecoration(
+                  focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.indigoAccent)),
+                  hintText: 'Enter email',
+                ),
+                autofocus: true,
+                style: GoogleFonts.novaMono(color: Colors.black87),
+              ),
+            ),
+            actions: <Widget>[
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 178, 38, 83),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  'Cancel',
+                  style: GoogleFonts.novaMono(color: Colors.white),
+                ),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.indigoAccent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    var acs = ActionCodeSettings(
+                        // URL you want to redirect back to.
+                        // URL must be whitelisted in the Firebase Console.
+                        url: 'https://localhost:54893/',
+                        handleCodeInApp: true,
+                        iOSBundleId: 'com.example.todoApp',
+                        androidPackageName: 'com.example.todoApp',
+                        androidInstallApp: true,
+                        androidMinimumVersion: '12');
+
+                    Map<String, dynamic> createTask(Task task) => {
+                          "name": task.name,
+                          "id": task.id,
+                          "userId": task.userId,
+                          "sharedByUserId": task.sharedByUserId ?? "",
+                          "emails": task.emails
+                        };
+
+                    var emailAuth = _textFieldController.text;
+                    task.emails.add(emailAuth);
+
+                    var db = FirebaseFirestore.instance;
+                    db.collection("task").doc(task.id).set(createTask(task));
+
+                    await FirebaseAuth.instance
+                        .sendSignInLinkToEmail(
+                            email: emailAuth, actionCodeSettings: acs)
+                        .catchError((onError) =>
+                            print('Error sending email verification $onError'))
+                        .then((value) {
+                      Navigator.of(context).pop();
+                      print('Successfully sent email verification');
+                    });
+                  }
+                },
+                child: Text('Share',
+                    style: GoogleFonts.novaMono(color: Colors.white)),
+              ),
+            ],
+          ),
+        );
       },
     );
   }
@@ -326,6 +441,22 @@ class TaskItem extends StatelessWidget {
                 ),
               ),
             ),
+            PopupMenuItem<String>(
+              value: "share",
+              child: RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: "Share ",
+                      style: GoogleFonts.novaMono(color: Colors.grey),
+                    ),
+                    const WidgetSpan(
+                      child: Icon(Icons.share, size: 14),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
           onSelected: (String value) {
             if (value == "editTask") {
@@ -337,6 +468,8 @@ class TaskItem extends StatelessWidget {
               );
             } else if (value == "deleteTask") {
               showAlertDialog(context, task);
+            } else if (value == "share") {
+              shareTaskDialog(context, task);
             }
           },
         ),
