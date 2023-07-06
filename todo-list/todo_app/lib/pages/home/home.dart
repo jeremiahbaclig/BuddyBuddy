@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:todo_app/auth.dart';
+import 'package:todo_app/auth/auth.dart';
 import 'package:todo_app/main.dart';
-import 'package:todo_app/navbar.dart';
-import 'package:todo_app/profile.dart';
-import 'package:todo_app/side_bar.dart';
-import 'package:todo_app/tasks.dart';
-import 'package:todo_app/welcome.dart';
+import 'package:todo_app/pages/navbar.dart';
+import 'package:todo_app/pages/home/profile.dart';
+import 'package:todo_app/utils/side_bar.dart';
+import 'package:todo_app/pages/tasks/tasks.dart';
+import 'package:todo_app/pages/welcome.dart';
 
 late User loggedinUser;
 

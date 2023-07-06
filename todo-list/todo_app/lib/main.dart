@@ -2,16 +2,16 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:todo_app/firebase_options.dart';
-import 'package:todo_app/home.dart';
-import 'package:todo_app/login.dart';
-import 'package:todo_app/navbar.dart';
-import 'package:todo_app/profile.dart';
-import 'package:todo_app/registration.dart';
-import 'package:todo_app/settings.dart';
-import 'package:todo_app/side_bar.dart';
-import 'package:todo_app/todo.dart';
-import 'package:todo_app/welcome.dart';
+import 'package:todo_app/auth/firebase_options.dart';
+import 'package:todo_app/pages/home/home.dart';
+import 'package:todo_app/pages/auth/login.dart';
+import 'package:todo_app/pages/navbar.dart';
+import 'package:todo_app/pages/home/profile.dart';
+import 'package:todo_app/pages/auth/registration.dart';
+import 'package:todo_app/pages/home/settings.dart';
+import 'package:todo_app/utils/side_bar.dart';
+import 'package:todo_app/pages/tasks/todo.dart';
+import 'package:todo_app/pages/welcome.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,12 +1,12 @@
 import "package:cloud_firestore/cloud_firestore.dart";
 import "package:flutter/material.dart";
 import "package:google_fonts/google_fonts.dart";
-import "package:todo_app/animations.dart";
-import "package:todo_app/navbar.dart";
-import "package:todo_app/rounded_button.dart";
-import "package:todo_app/todo.dart";
-import "package:todo_app/user.dart";
-import "package:todo_app/utils.dart";
+import 'package:todo_app/utils/animations.dart';
+import 'package:todo_app/pages/navbar.dart';
+import 'package:todo_app/utils/rounded_button.dart';
+import 'package:todo_app/pages/tasks/todo.dart';
+import 'package:todo_app/auth/user.dart';
+import 'package:todo_app/utils/utils.dart';
 
 typedef TaskDeleteCallback = void Function(Task task);
 

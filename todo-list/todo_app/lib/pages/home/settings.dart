@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:todo_app/navbar.dart';
-import 'main.dart';
+import 'package:todo_app/pages/navbar.dart';
+import '../../main.dart';
 
 class Settings extends StatelessWidget {
   const Settings({Key? key}) : super(key: key);

@@ -1,10 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:todo_app/animations.dart';
-import 'package:todo_app/auth.dart';
-import 'package:todo_app/login.dart';
-import 'package:todo_app/navbar.dart';
-import 'package:todo_app/rounded_button.dart';
+import 'package:todo_app/utils/animations.dart';
+import 'package:todo_app/auth/auth.dart';
+import 'package:todo_app/pages/auth/login.dart';
+import 'package:todo_app/pages/navbar.dart';
+import 'package:todo_app/utils/rounded_button.dart';
 
 class ProfilePage extends StatefulWidget {
   final User user;
