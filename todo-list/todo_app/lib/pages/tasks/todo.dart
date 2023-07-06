@@ -37,7 +37,9 @@ class _TodoListState extends State<TodoList> {
       "userId": todo.userId,
       "taskId": todo.taskId,
       "timeLastSeen": todo.timeLastSeen,
-      "secondsTilMidnight": todo.secondsTilMidnight
+      "secondsTilMidnight": todo.secondsTilMidnight,
+      "completedBy": todo.completedBy,
+      "completedList": todo.completedList
     };
   }
 
@@ -55,16 +57,59 @@ class _TodoListState extends State<TodoList> {
           userId: CurrentUser.getCurrentUser().uid,
           taskId: widget.taskIdHolder.taskId,
           timeLastSeen: now.millisecondsSinceEpoch ~/ 1000,
-          secondsTilMidnight: nextDay.millisecondsSinceEpoch ~/ 1000);
+          secondsTilMidnight: nextDay.millisecondsSinceEpoch ~/ 1000,
+          completedBy: [],
+          completedList: []);
       _todos.add(todo);
 
-      db.collection("todo").doc(todo.id).set(_createTask(todo));
+      db.collection("todo").doc(todo.id).update(_createTask(todo));
     });
     _textFieldController.clear();
   }
 
   void _handleTodoChange(Todo todo) {
     setState(() {
+      String newEmail = CurrentUser.getCurrentUser().email!;
+
+      db.collection("todo").doc(todo.id).get().then((snapshot) {
+        if (snapshot.exists) {
+          Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+
+          try {
+            List<String> completedBy = List<String>.from(data['completedBy']);
+            if (!completedBy.contains(newEmail)) {
+              completedBy.add(newEmail);
+            }
+
+            List<dynamic> completedList =
+                List<dynamic>.from(data['completedList']);
+
+            if (completedList.isNotEmpty) {
+              bool found = false;
+              for (var value in completedList) {
+                if (value["email"] == newEmail) {
+                  found = true;
+                  break;
+                }
+              }
+
+              if (found) {
+                completedList.add({"email": newEmail, "didComplete": true});
+              }
+            } else {
+              completedList.add({"email": newEmail, "didComplete": true});
+            }
+
+            db
+                .collection("todo")
+                .doc(todo.id)
+                .update({"completedBy": completedBy});
+          } catch (e) {
+            print(e);
+          }
+        }
+      });
+
       todo.completed = !todo.completed;
 
       db.collection("todo").doc(todo.id).update({
@@ -106,11 +151,15 @@ class _TodoListState extends State<TodoList> {
           continue;
         }
 
+        print("${keys} ::: ${values}");
+
         String name = values!.elementAt(keys.toList().indexOf('name'));
         bool completed = values.elementAt(keys.toList().indexOf('completed'));
         String id = values.elementAt(keys.toList().indexOf('id'));
         String userId = values.elementAt(keys.toList().indexOf('userId'));
         String taskId = values.elementAt(keys.toList().indexOf('taskId'));
+        Iterable<dynamic>? completedBy;
+        Iterable<dynamic>? completedList;
         dynamic timeLastSeen = null;
         dynamic secondsTilMidnight = null;
 
@@ -133,6 +182,19 @@ class _TodoListState extends State<TodoList> {
               .doc(id)
               .update({"secondsTilMidnight": secondsTilMidnight});
         }
+        try {
+          completedBy = List<String>.from(
+              values.elementAt(keys.toList().indexOf("completedBy")) ?? []);
+        } catch (e) {
+          completedBy = [];
+        }
+
+        try {
+          completedList = List<dynamic>.from(
+              values.elementAt(keys.toList().indexOf("completedList")) ?? []);
+        } catch (e) {
+          completedList = [];
+        }
 
         /*
           timeLastSeen and secondsTilMidnight are created on seed of the todo list.
@@ -149,11 +211,14 @@ class _TodoListState extends State<TodoList> {
           if (secondsTilMidnight <
               (now.millisecondsSinceEpoch ~/ 1000 - timeLastSeen)) {
             completed = false;
+            completedList = [];
+            completedBy = [];
             print("Has been a midnight since last seen. Resetting completed.");
           }
         }
 
-        if (userId != CurrentUser.getCurrentUser().uid) {
+        var currentUser = CurrentUser.getCurrentUser();
+        if (userId != currentUser.uid) {
           continue;
         } else if (taskId != widget.taskIdHolder.taskId) {
           continue;
@@ -165,7 +230,9 @@ class _TodoListState extends State<TodoList> {
               userId: userId,
               taskId: taskId,
               timeLastSeen: now.millisecondsSinceEpoch ~/ 1000,
-              secondsTilMidnight: nextDay.millisecondsSinceEpoch ~/ 1000));
+              secondsTilMidnight: nextDay.millisecondsSinceEpoch ~/ 1000,
+              completedBy: completedBy as List<String>,
+              completedList: completedList as List<dynamic>));
         }
       }
     });
@@ -324,7 +391,9 @@ class Todo {
       required this.userId,
       required this.taskId,
       this.timeLastSeen,
-      this.secondsTilMidnight});
+      this.secondsTilMidnight,
+      this.completedBy,
+      required this.completedList});
   String name;
   bool completed;
   String id;
@@ -332,6 +401,8 @@ class Todo {
   String taskId;
   int? timeLastSeen;
   int? secondsTilMidnight;
+  List<String>? completedBy;
+  List<dynamic> completedList;
 }
 
 class TodoItem extends StatelessWidget {
@@ -370,7 +441,18 @@ class TodoItem extends StatelessWidget {
       ),
       title: Row(children: <Widget>[
         Expanded(
-          child: Text(todo.name, style: _getTextStyle(todo.completed)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(todo.name, style: _getTextStyle(todo.completed)),
+              if (todo.completed)
+                Text(
+                  todo.completedBy!.join(", "),
+                  style: GoogleFonts.novaMono(
+                      color: Colors.greenAccent, fontSize: 12),
+                ),
+            ],
+          ),
         ),
         IconButton(
           iconSize: 30,
