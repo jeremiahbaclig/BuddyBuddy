@@ -160,31 +160,28 @@ class _LoginPageState extends State<LoginPage> {
                                   ],
                                 ),
                           const SizedBox(height: 24.0),
-                          _isProcessing
-                              ? listOfAnimations[1].widget
-                              : Padding(
-                                  padding: const EdgeInsets.only(bottom: 24.0),
-                                  child: MouseRegion(
-                                    cursor: SystemMouseCursors.click,
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                RegisterPage(),
-                                          ),
-                                        );
-                                      },
-                                      child: Text(
-                                        'Create an account?',
-                                        style: GoogleFonts.novaMono(
-                                          color: Colors.indigoAccent,
-                                          fontSize: 16,
-                                        ),
-                                      ),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 24.0),
+                            child: MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => RegisterPage(),
                                     ),
+                                  );
+                                },
+                                child: Text(
+                                  'Create an account?',
+                                  style: GoogleFonts.novaMono(
+                                    color: Colors.indigoAccent,
+                                    fontSize: 16,
                                   ),
                                 ),
+                              ),
+                            ),
+                          ),
                           InkWell(
                             onTap: () async {
                               _focusEmail.unfocus();

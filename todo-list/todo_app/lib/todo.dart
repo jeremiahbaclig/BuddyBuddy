@@ -58,6 +58,14 @@ class _TodoListState extends State<TodoList> {
   void _handleTodoChange(Todo todo) {
     setState(() {
       todo.completed = !todo.completed;
+
+      db.collection("todo").doc(todo.id).update({
+        "completed": todo.completed,
+      }).then((_) {
+        print("Todo status updated successfully!");
+      }).catchError((error) {
+        print("Failed to update todo status: $error");
+      });
     });
   }
 
