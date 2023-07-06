@@ -62,7 +62,7 @@ class _TodoListState extends State<TodoList> {
           completedList: []);
       _todos.add(todo);
 
-      db.collection("todo").doc(todo.id).update(_createTask(todo));
+      db.collection("todo").doc(todo.id).set(_createTask(todo));
     });
     _textFieldController.clear();
   }
@@ -405,6 +405,14 @@ class Todo {
   int? secondsTilMidnight;
   List<String>? completedBy;
   List<dynamic> completedList;
+
+  @override
+  String toString() {
+    return 'Todo(name: $name, completed: $completed, id: $id, userId: $userId, '
+        'taskId: $taskId, timeLastSeen: $timeLastSeen, '
+        'secondsTilMidnight: $secondsTilMidnight, '
+        'completedBy: $completedBy, completedList: $completedList)';
+  }
 }
 
 class TodoItem extends StatelessWidget {
@@ -428,22 +436,16 @@ class TodoItem extends StatelessWidget {
     return false;
   }
 
-  bool _myUserCompleted() {
-    bool myUserCompleted = false;
-
+  bool? _myUserCompleted() {
     for (var value in todo.completedList) {
-      if (value["didComplete"]) {
-        myUserCompleted = value["email"] == CurrentUser.getCurrentUser().email;
+      if (value["email"] == CurrentUser.getCurrentUser().email) {
+        return value["didComplete"];
       }
     }
-
-    return myUserCompleted;
   }
 
-  TextStyle? _getTextStyle(bool checked) {
-    if (!checked) return GoogleFonts.novaMono(color: Colors.grey);
-
-    if (_myUserCompleted() && checked) {
+  TextStyle? _getTextStyle() {
+    if (_myUserCompleted() ?? false) {
       return const TextStyle(
         color: Colors.black54,
         decoration: TextDecoration.lineThrough,
@@ -470,7 +472,7 @@ class TodoItem extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(todo.name, style: _getTextStyle(todo.completed)),
+              Text(todo.name, style: _getTextStyle()),
               Text(
                 todo.completedBy!.join(", ") ?? "",
                 style: GoogleFonts.novaMono(
