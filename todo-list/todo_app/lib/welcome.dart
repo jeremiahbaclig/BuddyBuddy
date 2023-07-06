@@ -61,6 +61,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    double screenWidth = screenSize.width;
+    double screenHeight = screenSize.height;
+
     return Scaffold(
       appBar: null,
       drawer: null,
@@ -76,7 +80,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   Positioned(
                     left: 0,
                     child: Transform.translate(
-                      offset: Offset(210 * _animation.value.dx, 0),
+                      offset:
+                          Offset((screenWidth / 1.95) * _animation.value.dx, 0),
                       child: Text(
                         'Buddy',
                         style: GoogleFonts.novaMono(
@@ -89,7 +94,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   Positioned(
                     right: 0,
                     child: Transform.translate(
-                      offset: Offset(-210 * _animation.value.dx, 0),
+                      offset: Offset(
+                          -(screenWidth / 1.95) * _animation.value.dx, 0),
                       child: Text(
                         'Buddy',
                         style: GoogleFonts.novaMono(

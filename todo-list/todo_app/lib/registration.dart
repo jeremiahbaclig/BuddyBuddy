@@ -59,7 +59,7 @@ class _RegisterPageState extends State<RegisterPage> {
         appBar: const CustomAppBar(
           title: "Buddy Buddy",
           backButton: true,
-          pushToWhere: "/",
+          pushToWhere: "login",
         ),
         body: Padding(
           padding: const EdgeInsets.all(24.0),

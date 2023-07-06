@@ -23,7 +23,7 @@ final listOfAnimations = <AppBody>[
   AppBody(
     'inkDrop',
     LoadingAnimationWidget.inkDrop(
-      color: Colors.white,
+      color: Colors.indigo[100]!,
       size: _kSize,
     ),
   ),

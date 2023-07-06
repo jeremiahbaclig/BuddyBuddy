@@ -159,39 +159,135 @@ class _LoginPageState extends State<LoginPage> {
                                     ),
                                   ],
                                 ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 24.0),
-                            child: MouseRegion(
-                              cursor: SystemMouseCursors.click,
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => RegisterPage(),
+                          const SizedBox(height: 24.0),
+                          _isProcessing
+                              ? listOfAnimations[1].widget
+                              : Padding(
+                                  padding: const EdgeInsets.only(bottom: 24.0),
+                                  child: MouseRegion(
+                                    cursor: SystemMouseCursors.click,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                RegisterPage(),
+                                          ),
+                                        );
+                                      },
+                                      child: Text(
+                                        'Create an account?',
+                                        style: GoogleFonts.novaMono(
+                                          color: Colors.indigoAccent,
+                                          fontSize: 16,
+                                        ),
+                                      ),
                                     ),
-                                  );
-                                },
-                                child: Text(
-                                  'Create an account?',
-                                  style: GoogleFonts.novaMono(
-                                    color: Colors.indigoAccent,
-                                    fontSize: 16,
                                   ),
                                 ),
+                          InkWell(
+                            onTap: () async {
+                              _focusEmail.unfocus();
+                              _focusPassword.unfocus();
+
+                              setState(() {
+                                _isProcessing = true;
+                              });
+
+                              User? user = await Auth.signInWithGoogle(context);
+
+                              setState(() {
+                                _isProcessing = false;
+                              });
+
+                              if (user != null) {
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                    builder: (context) => const HomeScreen(),
+                                  ),
+                                );
+                              }
+                            },
+                            child: RichText(
+                              text: TextSpan(
+                                style: DefaultTextStyle.of(context).style,
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text: 'Sign in with\n',
+                                    style: GoogleFonts.novaMono(
+                                      color: Colors.grey,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const TextSpan(
+                                    text: ' G',
+                                    style: TextStyle(
+                                      color: Color(0xFF008744), // Green
+                                      fontSize: 30.0,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Arial',
+                                    ),
+                                  ),
+                                  const TextSpan(
+                                    text: 'o',
+                                    style: TextStyle(
+                                      color: Color(0xFFD50F25), // Red
+                                      fontSize: 30.0,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Arial',
+                                    ),
+                                  ),
+                                  const TextSpan(
+                                    text: 'o',
+                                    style: TextStyle(
+                                      color: Color(0xFFF4B400), // Yellow
+                                      fontSize: 30.0,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Arial',
+                                    ),
+                                  ),
+                                  const TextSpan(
+                                    text: 'g',
+                                    style: TextStyle(
+                                      color: Color(0xFF4285F4), // Blue
+                                      fontSize: 30.0,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Arial',
+                                    ),
+                                  ),
+                                  const TextSpan(
+                                    text: 'l',
+                                    style: TextStyle(
+                                      color: Color(0xFF008744), // Green
+                                      fontSize: 30.0,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Arial',
+                                    ),
+                                  ),
+                                  const TextSpan(
+                                    text: 'e',
+                                    style: TextStyle(
+                                      color: Color(0xFFD50F25), // Red
+                                      fontSize: 30.0,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Arial',
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
+                          )
                         ],
                       ),
                     )
                   ],
                 ),
               );
+            } else {
+              return Center(
+                child: listOfAnimations[1].widget,
+              );
             }
-
-            return Center(
-              child: listOfAnimations[1].widget,
-            );
           },
         ),
       ),

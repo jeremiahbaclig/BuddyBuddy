@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -58,6 +59,27 @@ class Auth {
     }
 
     return user;
+  }
+
+  static Future<User?> signInWithGoogle(BuildContext context) async {
+    await Firebase.initializeApp();
+    User? user;
+    FirebaseAuth auth = FirebaseAuth.instance;
+
+    GoogleAuthProvider authProvider = GoogleAuthProvider();
+
+    try {
+      final UserCredential userCredential =
+          await auth.signInWithPopup(authProvider);
+      user = userCredential.user;
+    } catch (e) {
+      displayError(context, 'Failed to sign in with Google.');
+      print("${e}");
+    }
+
+    if (user != null) {
+      return user;
+    }
   }
 
   static Future<User?> refreshUser(User user) async {
