@@ -1,46 +1,108 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'rounded_button.dart';
+import 'package:flutter/physics.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:todo_app/login.dart';
 
 class WelcomeScreen extends StatefulWidget {
-  const WelcomeScreen({super.key});
+  const WelcomeScreen({Key? key}) : super(key: key);
 
   @override
   _WelcomeScreenState createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen> {
+class _WelcomeScreenState extends State<WelcomeScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<Offset> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+
+    _animation = Tween<Offset>(
+      begin: const Offset(-1, 0),
+      end: const Offset(1, 0),
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.elasticInOut,
+      ),
+    );
+
+    _controller.addListener(() {
+      setState(() {});
+    });
+
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => LoginPage(),
+          ),
+        );
+      }
+    });
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/bear.jpg'),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              RoundedButton(
-                color: Colors.indigoAccent,
-                title: 'Log In',
-                onPressed: () {
-                  Navigator.pushNamed(context, 'login_screen');
-                },
+      appBar: null,
+      drawer: null,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              height: 300,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Positioned(
+                    left: 0,
+                    child: Transform.translate(
+                      offset: Offset(210 * _animation.value.dx, 0),
+                      child: Text(
+                        'Buddy',
+                        style: GoogleFonts.novaMono(
+                          color: Colors.indigoAccent,
+                          fontSize: 28,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    right: 0,
+                    child: Transform.translate(
+                      offset: Offset(-210 * _animation.value.dx, 0),
+                      child: Text(
+                        'Buddy',
+                        style: GoogleFonts.novaMono(
+                          color: Colors.indigoAccent,
+                          fontSize: 28,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              RoundedButton(
-                color: Colors.indigoAccent,
-                title: 'Register',
-                onPressed: () {
-                  Navigator.pushNamed(context, 'registration_screen');
-                },
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

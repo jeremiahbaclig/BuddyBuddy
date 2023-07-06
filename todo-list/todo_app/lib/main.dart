@@ -48,10 +48,11 @@ class _TodoAppState extends State<TodoApp> {
         drawer: const SideBar(),
       ),
       routes: {
-        'registration_screen': (context) => RegisterPage(),
-        'login_screen': (context) => LoginPage(),
-        'home_screen': (context) => const HomeScreen(),
-        'settings_screen': (context) => const Settings(),
+        'registration': (context) => RegisterPage(),
+        'login': (context) => LoginPage(),
+        'home': (context) => const HomeScreen(),
+        'settings': (context) => const Settings(),
+        'welcome': (context) => const WelcomeScreen(),
       },
       onUnknownRoute: (RouteSettings settings) {
         return MaterialPageRoute<void>(

@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:todo_app/animations.dart';
 import 'package:todo_app/auth.dart';
 import 'package:todo_app/home.dart';
 import 'package:todo_app/navbar.dart';
@@ -112,7 +113,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           const SizedBox(height: 24.0),
                           _isProcessing
-                              ? const CircularProgressIndicator()
+                              ? listOfAnimations[1].widget
                               : Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -156,23 +157,30 @@ class _LoginPageState extends State<LoginPage> {
                                         },
                                       ),
                                     ),
-                                    const SizedBox(width: 24.0),
-                                    Expanded(
-                                      child: RoundedButton(
-                                        color: Colors.indigoAccent,
-                                        onPressed: () {
-                                          Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  RegisterPage(),
-                                            ),
-                                          );
-                                        },
-                                        title: "Register",
-                                      ),
-                                    ),
                                   ],
-                                )
+                                ),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 24.0),
+                            child: MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => RegisterPage(),
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  'Create an account?',
+                                  style: GoogleFonts.novaMono(
+                                    color: Colors.indigoAccent,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     )
@@ -181,8 +189,8 @@ class _LoginPageState extends State<LoginPage> {
               );
             }
 
-            return const Center(
-              child: CircularProgressIndicator(),
+            return Center(
+              child: listOfAnimations[1].widget,
             );
           },
         ),

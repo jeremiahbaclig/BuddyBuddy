@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:todo_app/animations.dart';
 import 'package:todo_app/auth.dart';
 import 'package:todo_app/login.dart';
 import 'package:todo_app/navbar.dart';
@@ -32,7 +33,7 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: const CustomAppBar(
         title: "Profile",
         backButton: true,
-        pushToWhere: "home_screen",
+        pushToWhere: "home",
       ),
       body: Center(
         child: Column(
@@ -72,7 +73,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
             _isSendingVerification
-                ? const CircularProgressIndicator()
+                ? listOfAnimations[1].widget
                 : Row(
                     mainAxisSize: MainAxisSize.min,
                     children: !_currentUser.emailVerified

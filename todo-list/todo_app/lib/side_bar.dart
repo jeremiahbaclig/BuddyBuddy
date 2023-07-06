@@ -12,7 +12,7 @@ class SideBar extends StatelessWidget {
               leading: const Icon(Icons.settings),
               title: const Text("Settings"),
               onTap: () {
-                Navigator.pushNamed(context, 'settings_screen');
+                Navigator.pushNamed(context, 'settings');
               }),
         ],
       ),

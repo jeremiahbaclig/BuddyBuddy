@@ -1,6 +1,7 @@
 import "package:cloud_firestore/cloud_firestore.dart";
 import "package:flutter/material.dart";
 import "package:google_fonts/google_fonts.dart";
+import "package:todo_app/animations.dart";
 import "package:todo_app/navbar.dart";
 import "package:todo_app/rounded_button.dart";
 import "package:todo_app/todo.dart";
@@ -146,16 +147,11 @@ class _TaskListState extends State<TaskList> {
                 ),
               ];
             } else {
-              widgetChildren = const <Widget>[
+              widgetChildren = <Widget>[
+                Center(child: listOfAnimations[1].widget),
                 Center(
-                  child: SizedBox(
-                    width: 60,
-                    height: 60,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-                Center(
-                  child: Text("Awaiting data..."),
+                  child: Text("Awaiting data...",
+                      style: GoogleFonts.novaMono(color: Colors.indigoAccent)),
                 ),
               ];
             }

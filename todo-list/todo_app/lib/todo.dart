@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:todo_app/animations.dart';
 import 'package:todo_app/navbar.dart';
 import 'package:todo_app/user.dart';
 import 'package:todo_app/utils.dart';
@@ -115,7 +116,7 @@ class _TodoListState extends State<TodoList> {
         customColor: Colors.grey,
         fontSize: 18,
         backButton: true,
-        pushToWhere: "home_screen",
+        pushToWhere: "home",
       ),
       body: FutureBuilder(
           future: _seedTodoItems(),
@@ -163,16 +164,11 @@ class _TodoListState extends State<TodoList> {
                 ),
               ];
             } else {
-              widgetChildren = const <Widget>[
+              widgetChildren = <Widget>[
+                Center(child: listOfAnimations[1].widget),
                 Center(
-                  child: SizedBox(
-                    width: 60,
-                    height: 60,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-                Center(
-                  child: Text('Awaiting data...'),
+                  child: Text("Awaiting data...",
+                      style: GoogleFonts.novaMono(color: Colors.indigoAccent)),
                 ),
               ];
             }

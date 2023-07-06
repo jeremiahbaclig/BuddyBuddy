@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:todo_app/animations.dart';
 import 'package:todo_app/auth.dart';
+import 'package:todo_app/home.dart';
 import 'package:todo_app/navbar.dart';
 import 'package:todo_app/profile.dart';
 import 'package:todo_app/rounded_button.dart';
@@ -25,6 +27,25 @@ class _RegisterPageState extends State<RegisterPage> {
   final _focusPassword = FocusNode();
 
   bool _isProcessing = false;
+  bool _isFormFilled = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Add listeners to text controllers
+    _nameTextController.addListener(_updateFormFilledStatus);
+    _emailTextController.addListener(_updateFormFilledStatus);
+    _passwordTextController.addListener(_updateFormFilledStatus);
+  }
+
+  void _updateFormFilledStatus() {
+    setState(() {
+      _isFormFilled = _nameTextController.text.isNotEmpty &&
+          _emailTextController.text.isNotEmpty &&
+          _passwordTextController.text.isNotEmpty;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -111,46 +132,59 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 32.0),
                       _isProcessing
-                          ? const CircularProgressIndicator()
+                          ? listOfAnimations[1].widget
                           : Row(
                               children: [
                                 Expanded(
-                                  child: RoundedButton(
-                                    title: "Sign Up",
-                                    color: Colors.indigoAccent,
-                                    onPressed: () async {
-                                      setState(() {
-                                        _isProcessing = true;
-                                      });
+                                  child: GestureDetector(
+                                    onTap: _isFormFilled && !_isProcessing
+                                        ? () async {
+                                            setState(() {
+                                              _isProcessing = true;
+                                            });
 
-                                      if (_registerFormKey.currentState!
-                                          .validate()) {
-                                        User? user = await Auth
-                                            .registerUsingEmailPassword(
-                                                name: _nameTextController.text,
-                                                email:
-                                                    _emailTextController.text,
-                                                password:
-                                                    _passwordTextController
-                                                        .text,
-                                                context: context);
+                                            if (_registerFormKey.currentState!
+                                                .validate()) {
+                                              User? user =
+                                                  await Auth.registerUsingEmailPassword(
+                                                      name: _nameTextController
+                                                          .text,
+                                                      email:
+                                                          _emailTextController
+                                                              .text,
+                                                      password:
+                                                          _passwordTextController
+                                                              .text,
+                                                      context: context);
 
-                                        setState(() {
-                                          _isProcessing = false;
-                                        });
+                                              setState(() {
+                                                _isProcessing = false;
+                                              });
 
-                                        if (user != null) {
-                                          Navigator.of(context)
-                                              .pushAndRemoveUntil(
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  ProfilePage(user: user),
-                                            ),
-                                            ModalRoute.withName('/'),
-                                          );
-                                        }
-                                      }
-                                    },
+                                              if (user != null) {
+                                                Navigator.of(context)
+                                                    .pushAndRemoveUntil(
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        const HomeScreen(),
+                                                  ),
+                                                  ModalRoute.withName('/'),
+                                                );
+                                              }
+                                            } else {
+                                              setState(() {
+                                                _isProcessing = false;
+                                              });
+                                            }
+                                          }
+                                        : null,
+                                    child: RoundedButton(
+                                      onPressed: () => {},
+                                      title: "Sign Up",
+                                      color: _isFormFilled && !_isProcessing
+                                          ? Colors.indigoAccent
+                                          : Colors.grey,
+                                    ),
                                   ),
                                 ),
                               ],

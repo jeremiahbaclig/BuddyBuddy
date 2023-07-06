@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class Auth {
   static Future<User?> registerUsingEmailPassword(
@@ -8,7 +9,9 @@ class Auth {
       required String password,
       required BuildContext context}) async {
     FirebaseAuth auth = FirebaseAuth.instance;
+    final GoogleSignIn _googleSignIn = GoogleSignIn();
     User? user;
+
     try {
       UserCredential userCredential = await auth.createUserWithEmailAndPassword(
         email: email,
