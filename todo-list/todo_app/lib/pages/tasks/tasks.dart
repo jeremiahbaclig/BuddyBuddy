@@ -382,7 +382,7 @@ class TaskItem extends StatelessWidget {
                     var acs = ActionCodeSettings(
                         // URL you want to redirect back to.
                         // URL must be whitelisted in the Firebase Console.
-                        url: 'https://localhost:54893/',
+                        url: 'https://buddybuddy-96544.web.app/',
                         handleCodeInApp: true,
                         iOSBundleId: 'com.example.todoApp',
                         androidPackageName: 'com.example.todoApp',
