@@ -179,7 +179,6 @@ class _RegisterPageState extends State<RegisterPage> {
                                           }
                                         : null,
                                     child: RoundedButton(
-                                      onPressed: () => {},
                                       title: "Sign Up",
                                       color: _isFormFilled && !_isProcessing
                                           ? Colors.indigoAccent

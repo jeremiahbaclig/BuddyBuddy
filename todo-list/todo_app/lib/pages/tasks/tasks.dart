@@ -31,7 +31,6 @@ class _TaskListState extends State<TaskList> {
       "name": task.name,
       "id": task.id,
       "userId": task.userId,
-      "sharedByUserId": task.sharedByUserId ?? "",
       "emails": task.emails
     };
   }
@@ -69,31 +68,36 @@ class _TaskListState extends State<TaskList> {
     _tasks.clear();
     await db.collection("task").get().then((event) {
       for (var doc in event.docs) {
-        var values = doc.data().values;
-        var keys = doc.data().keys;
+        Iterable<dynamic>? values;
+        Iterable<dynamic>? keys;
+        try {
+          values = doc.data().values;
+          keys = doc.data().keys;
+        } catch (e) {
+          print("BAD DATA: ${e}");
+          continue;
+        }
 
-        dynamic sharedByUserId = null;
-        String name = values.elementAt(keys.toList().indexOf("name"));
+        if (keys!.length < 2) {
+          continue;
+        }
+
+        String name = values!.elementAt(keys!.toList().indexOf("name"));
         String id = values.elementAt(keys.toList().indexOf("id"));
         String userId = values.elementAt(keys.toList().indexOf("userId"));
-        try {
-          sharedByUserId =
-              values.elementAt(keys.toList().indexOf("sharedByUserId"));
-        } catch (e) {}
         List<dynamic> emails =
             values.elementAt(keys.toList().indexOf("emails"));
 
         if (userId != currentUser.uid) {
+          if ((emails.contains(currentUser.email))) {
+            _tasks
+                .add(Task(name: name, id: id, userId: userId, emails: emails));
+          }
           continue;
         } else if (!(emails.contains(currentUser.email))) {
           continue;
         } else {
-          _tasks.add(Task(
-              name: name,
-              id: id,
-              userId: userId,
-              sharedByUserId: sharedByUserId,
-              emails: emails));
+          _tasks.add(Task(name: name, id: id, userId: userId, emails: emails));
         }
       }
     });
@@ -108,7 +112,8 @@ class _TaskListState extends State<TaskList> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text("${CurrentUser.getCurrentUser().displayName}'s Tasks",
+        title: Text(
+            "${CurrentUser.getCurrentUser().displayName ?? "Your User"}'s Tasks",
             style: GoogleFonts.novaMono(
               color: Colors.grey,
               fontSize: 18,
@@ -248,12 +253,10 @@ class Task {
       {required this.name,
       required this.id,
       required this.userId,
-      this.sharedByUserId,
       required this.emails});
   String name;
   String id;
   String userId;
-  String? sharedByUserId;
   List<dynamic> emails;
 }
 
@@ -364,7 +367,6 @@ class TaskItem extends StatelessWidget {
                           "name": task.name,
                           "id": task.id,
                           "userId": task.userId,
-                          "sharedByUserId": task.sharedByUserId ?? "",
                           "emails": task.emails
                         };
 

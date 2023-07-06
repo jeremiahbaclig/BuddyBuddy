@@ -86,43 +86,41 @@ class _TodoListState extends State<TodoList> {
           Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
 
           try {
-            List<String> completedBy = List<String>.from(data['completedBy']);
-            if (!completedBy.contains(newEmail)) {
-              completedBy.add(newEmail);
+            List<dynamic>? completedList =
+                List<dynamic>.from(snapshot.data()?['completedList'] ?? []);
+
+            bool emailFound = false;
+            bool myUserCompleted = false;
+            for (int i = 0; i < completedList.length; i++) {
+              if (completedList[i]["email"] == newEmail) {
+                emailFound = true;
+                completedList[i]["didComplete"] =
+                    !completedList[i]["didComplete"];
+                myUserCompleted = completedList[i]["didComplete"];
+                break;
+              }
             }
 
-            List<dynamic>? completedList;
-            try {
-              completedList = List<dynamic>.from(data['completedList']) ?? [];
-            } catch (e) {
-              completedList = [];
-            }
-
-            if (completedList.isNotEmpty) {
-              bool found = false;
-              for (var value in completedList) {
-                if (value["email"] == newEmail) {
-                  found = true;
-                  break;
-                }
-              }
-
-              if (!found) {
-                completedList.add({"email": newEmail, "didComplete": true});
-              }
-            } else {
+            if (!emailFound) {
               completedList.add({"email": newEmail, "didComplete": true});
             }
 
-            db
-                .collection("todo")
-                .doc(todo.id)
-                .update({"completedBy": completedBy});
+            List<String> completedBy = List<String>.from(data['completedBy']);
+            if (!completedBy.contains(newEmail)) {
+              completedBy.add(newEmail);
+            } else if (!myUserCompleted) {
+              completedBy.removeWhere((element) => element == newEmail);
+            }
 
             db
                 .collection("todo")
                 .doc(todo.id)
                 .update({"completedList": completedList});
+
+            db
+                .collection("todo")
+                .doc(todo.id)
+                .update({"completedBy": completedBy});
           } catch (e) {
             print(e);
           }
@@ -224,10 +222,7 @@ class _TodoListState extends State<TodoList> {
           }
         }
 
-        var currentUser = CurrentUser.getCurrentUser();
-        if (userId != currentUser.uid) {
-          continue;
-        } else if (taskId != widget.taskIdHolder.taskId) {
+        if (taskId != widget.taskIdHolder.taskId) {
           continue;
         } else {
           _todos.add(Todo(
@@ -423,13 +418,37 @@ class TodoItem extends StatelessWidget {
   final void Function(Todo todo) onTodoChanged;
   final void Function(Todo todo) removeTodo;
 
+  bool _getCheckboxForUser() {
+    for (var value in todo.completedList) {
+      if (value["email"] == CurrentUser.getCurrentUser().email) {
+        return value["didComplete"];
+      }
+    }
+
+    return false;
+  }
+
+  bool _myUserCompleted() {
+    bool myUserCompleted = false;
+
+    for (var value in todo.completedList) {
+      if (value["didComplete"]) {
+        myUserCompleted = value["email"] == CurrentUser.getCurrentUser().email;
+      }
+    }
+
+    return myUserCompleted;
+  }
+
   TextStyle? _getTextStyle(bool checked) {
     if (!checked) return GoogleFonts.novaMono(color: Colors.grey);
 
-    return const TextStyle(
-      color: Colors.black54,
-      decoration: TextDecoration.lineThrough,
-    );
+    if (_myUserCompleted() && checked) {
+      return const TextStyle(
+        color: Colors.black54,
+        decoration: TextDecoration.lineThrough,
+      );
+    }
   }
 
   @override
@@ -441,7 +460,7 @@ class TodoItem extends StatelessWidget {
       leading: Checkbox(
         checkColor: Colors.greenAccent,
         activeColor: const Color.fromARGB(255, 178, 38, 83),
-        value: todo.completed,
+        value: _getCheckboxForUser(),
         onChanged: (value) {
           onTodoChanged(todo);
         },
@@ -452,12 +471,11 @@ class TodoItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(todo.name, style: _getTextStyle(todo.completed)),
-              if (todo.completed)
-                Text(
-                  todo.completedBy!.join(", "),
-                  style: GoogleFonts.novaMono(
-                      color: Colors.greenAccent, fontSize: 12),
-                ),
+              Text(
+                todo.completedBy!.join(", ") ?? "",
+                style: GoogleFonts.novaMono(
+                    color: Colors.greenAccent, fontSize: 12),
+              ),
             ],
           ),
         ),
