@@ -35,19 +35,27 @@ class _TodoListState extends State<TodoList> {
       "completed": todo.completed,
       "id": todo.id,
       "userId": todo.userId,
-      "taskId": todo.taskId
+      "taskId": todo.taskId,
+      "timeLastSeen": todo.timeLastSeen,
+      "secondsTilMidnight": todo.secondsTilMidnight
     };
   }
 
   void _addTodoItem(String name) {
     setState(() {
       var newId = Generator.createUniqueId(20);
+
+      DateTime now = DateTime.now();
+      DateTime nextDay = DateTime(now.year, now.month, now.day + 1);
+
       var todo = Todo(
           name: name,
           completed: false,
           id: newId,
           userId: CurrentUser.getCurrentUser().uid,
-          taskId: widget.taskIdHolder.taskId);
+          taskId: widget.taskIdHolder.taskId,
+          timeLastSeen: now.millisecondsSinceEpoch ~/ 1000,
+          secondsTilMidnight: nextDay.millisecondsSinceEpoch ~/ 1000);
       _todos.add(todo);
 
       db.collection("todo").doc(todo.id).set(_createTask(todo));
@@ -84,14 +92,66 @@ class _TodoListState extends State<TodoList> {
     _todos.clear();
     await db.collection("todo").get().then((event) {
       for (var doc in event.docs) {
-        var values = doc.data().values;
-        var keys = doc.data().keys;
+        Iterable<dynamic>? values;
+        Iterable<dynamic>? keys;
+        try {
+          values = doc.data().values;
+          keys = doc.data().keys;
+        } catch (e) {
+          print("BAD DATA: ${e}");
+          continue;
+        }
 
-        String name = values.elementAt(keys.toList().indexOf('name'));
+        if (keys.length < 2) {
+          continue;
+        }
+
+        String name = values!.elementAt(keys.toList().indexOf('name'));
         bool completed = values.elementAt(keys.toList().indexOf('completed'));
         String id = values.elementAt(keys.toList().indexOf('id'));
         String userId = values.elementAt(keys.toList().indexOf('userId'));
         String taskId = values.elementAt(keys.toList().indexOf('taskId'));
+        dynamic timeLastSeen = null;
+        dynamic secondsTilMidnight = null;
+
+        DateTime now = DateTime.now();
+        DateTime nextDay = DateTime(now.year, now.month, now.day + 1);
+        try {
+          timeLastSeen =
+              values.elementAt(keys.toList().indexOf("timeLastSeen"));
+        } catch (e) {
+          timeLastSeen = now.millisecondsSinceEpoch ~/ 1000;
+          db.collection("todo").doc(id).update({"timeLastSeen": timeLastSeen});
+        }
+        try {
+          secondsTilMidnight =
+              values.elementAt(keys.toList().indexOf("secondsTilMidnight"));
+        } catch (e) {
+          secondsTilMidnight = nextDay.millisecondsSinceEpoch ~/ 1000;
+          db
+              .collection("todo")
+              .doc(id)
+              .update({"secondsTilMidnight": secondsTilMidnight});
+        }
+
+        /*
+          timeLastSeen and secondsTilMidnight are created on seed of the todo list.
+          secondsTilMidnight: (midnight - currentTime)
+
+          if they don't exist, then seed them accordingly
+          otherwise, check that the time until midnight is less than
+          (now - timeLastSeen)[which is the time elapsed since last time]
+
+          if it is greater, then that means not enough time passed, so 
+          completed for today is still valid
+        */
+        if (timeLastSeen != null && secondsTilMidnight != null) {
+          if (secondsTilMidnight <
+              (now.millisecondsSinceEpoch ~/ 1000 - timeLastSeen)) {
+            completed = false;
+            print("Has been a midnight since last seen. Resetting completed.");
+          }
+        }
 
         if (userId != CurrentUser.getCurrentUser().uid) {
           continue;
@@ -103,7 +163,9 @@ class _TodoListState extends State<TodoList> {
               completed: completed,
               id: id,
               userId: userId,
-              taskId: taskId));
+              taskId: taskId,
+              timeLastSeen: now.millisecondsSinceEpoch ~/ 1000,
+              secondsTilMidnight: nextDay.millisecondsSinceEpoch ~/ 1000));
         }
       }
     });
@@ -260,12 +322,16 @@ class Todo {
       required this.completed,
       required this.id,
       required this.userId,
-      required this.taskId});
+      required this.taskId,
+      this.timeLastSeen,
+      this.secondsTilMidnight});
   String name;
   bool completed;
   String id;
   String userId;
   String taskId;
+  int? timeLastSeen;
+  int? secondsTilMidnight;
 }
 
 class TodoItem extends StatelessWidget {
