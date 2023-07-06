@@ -71,6 +71,16 @@ class _TodoListState extends State<TodoList> {
     setState(() {
       String newEmail = CurrentUser.getCurrentUser().email!;
 
+      todo.completed = !todo.completed;
+
+      db.collection("todo").doc(todo.id).update({
+        "completed": todo.completed,
+      }).then((_) {
+        print("Todo status updated successfully!");
+      }).catchError((error) {
+        print("Failed to update todo status: $error");
+      });
+
       db.collection("todo").doc(todo.id).get().then((snapshot) {
         if (snapshot.exists) {
           Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
@@ -81,8 +91,12 @@ class _TodoListState extends State<TodoList> {
               completedBy.add(newEmail);
             }
 
-            List<dynamic> completedList =
-                List<dynamic>.from(data['completedList']);
+            List<dynamic>? completedList;
+            try {
+              completedList = List<dynamic>.from(data['completedList']) ?? [];
+            } catch (e) {
+              completedList = [];
+            }
 
             if (completedList.isNotEmpty) {
               bool found = false;
@@ -93,7 +107,7 @@ class _TodoListState extends State<TodoList> {
                 }
               }
 
-              if (found) {
+              if (!found) {
                 completedList.add({"email": newEmail, "didComplete": true});
               }
             } else {
@@ -104,20 +118,15 @@ class _TodoListState extends State<TodoList> {
                 .collection("todo")
                 .doc(todo.id)
                 .update({"completedBy": completedBy});
+
+            db
+                .collection("todo")
+                .doc(todo.id)
+                .update({"completedList": completedList});
           } catch (e) {
             print(e);
           }
         }
-      });
-
-      todo.completed = !todo.completed;
-
-      db.collection("todo").doc(todo.id).update({
-        "completed": todo.completed,
-      }).then((_) {
-        print("Todo status updated successfully!");
-      }).catchError((error) {
-        print("Failed to update todo status: $error");
       });
     });
   }
@@ -150,8 +159,6 @@ class _TodoListState extends State<TodoList> {
         if (keys.length < 2) {
           continue;
         }
-
-        print("${keys} ::: ${values}");
 
         String name = values!.elementAt(keys.toList().indexOf('name'));
         bool completed = values.elementAt(keys.toList().indexOf('completed'));
