@@ -54,10 +54,24 @@ class _TaskListState extends State<TaskList> {
   void deleteTask(Task task) {
     setState(() {
       db.collection("task").doc(task.id).delete().then(
-            (doc) => print("Deleted task successfully"),
-            onError: (e) => print("Error updating document $e"),
-          );
+        (doc) {
+          print("Deleted task successfully");
 
+          // Delete associated todos
+          db.collection("todo").where("taskId", isEqualTo: task.id).get().then(
+            (snapshot) {
+              for (var doc in snapshot.docs) {
+                doc.reference.delete().then(
+                      (_) => print("Deleted associated todo successfully"),
+                      onError: (e) =>
+                          print("Error deleting associated todo: $e"),
+                    );
+              }
+            },
+          );
+        },
+        onError: (e) => print("Error updating document $e"),
+      );
       _tasks.removeWhere((element) => element.name == task.name);
       widget.onDeleteTask(task);
     });
@@ -112,13 +126,25 @@ class _TaskListState extends State<TaskList> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(
-            "${CurrentUser.getCurrentUser().displayName ?? "Your User"}'s Tasks",
-            style: GoogleFonts.novaMono(
-              color: Colors.grey,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            )),
+        title: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                  text:
+                      "${CurrentUser.getCurrentUser().displayName ?? "Your User"}'s ",
+                  style: GoogleFonts.novaMono(
+                      color: Colors.indigoAccent,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16)),
+              TextSpan(
+                  text: "Tasks",
+                  style: GoogleFonts.novaMono(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16)),
+            ],
+          ),
+        ),
         backgroundColor: Colors.transparent,
       ),
       body: FutureBuilder(

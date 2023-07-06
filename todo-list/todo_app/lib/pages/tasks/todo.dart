@@ -253,7 +253,7 @@ class _TodoListState extends State<TodoList> {
       appBar: CustomAppBar(
         title: widget.taskIdHolder.taskName,
         customColor: Colors.grey,
-        fontSize: 18,
+        fontSize: 16,
         backButton: true,
         pushToWhere: "home",
       ),
@@ -446,10 +446,14 @@ class TodoItem extends StatelessWidget {
 
   TextStyle? _getTextStyle() {
     if (_myUserCompleted() ?? false) {
-      return const TextStyle(
-        color: Colors.black54,
-        decoration: TextDecoration.lineThrough,
-      );
+      return GoogleFonts.novaMono(
+          color: Colors.black38,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          decoration: TextDecoration.lineThrough);
+    } else {
+      return GoogleFonts.novaMono(
+          color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w600);
     }
   }
 
@@ -469,16 +473,24 @@ class TodoItem extends StatelessWidget {
       ),
       title: Row(children: <Widget>[
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(todo.name, style: _getTextStyle()),
-              Text(
-                todo.completedBy!.join(", ") ?? "",
-                style: GoogleFonts.novaMono(
-                    color: Colors.greenAccent, fontSize: 12),
-              ),
-            ],
+          child: IntrinsicHeight(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(todo.name, style: _getTextStyle()),
+                todo.completedBy!.isNotEmpty
+                    ? Text(
+                        todo.completedBy!.join(", "),
+                        style: GoogleFonts.novaMono(
+                            color: Colors.greenAccent, fontSize: 12),
+                      )
+                    : Text(
+                        "None completed yet",
+                        style: GoogleFonts.novaMono(
+                            color: Colors.grey, fontSize: 12),
+                      ),
+              ],
+            ),
           ),
         ),
         IconButton(
