@@ -1,3 +1,5 @@
-# todo_app
+# Buddy Buddy
 
-A new Flutter project.
+After installing flutter globally:
+- flutter pub get
+- flutter run

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:todo_app/main.dart';
 import 'package:todo_app/utils/animations.dart';
 import 'package:todo_app/auth/auth.dart';
 import 'package:todo_app/pages/home/home.dart';
@@ -49,6 +51,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    var themeMode = Provider.of<DarkMode>(context);
     return GestureDetector(
       onTap: () {
         _focusName.unfocus();
@@ -71,8 +74,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   padding: const EdgeInsets.only(bottom: 24.0),
                   child: Text(
                     'Register',
-                    style:
-                        GoogleFonts.novaMono(color: Colors.grey, fontSize: 24),
+                    style: themeMode.darkMode
+                        ? GoogleFonts.novaMono(color: Colors.grey, fontSize: 24)
+                        : GoogleFonts.novaMono(
+                            color: Colors.black54, fontSize: 24),
                   ),
                 ),
                 Form(
@@ -86,7 +91,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           name: value!,
                         ),
                         decoration: InputDecoration(
-                          hintText: "Name",
+                          hintText: "name",
                           errorBorder: UnderlineInputBorder(
                             borderRadius: BorderRadius.circular(6.0),
                             borderSide: const BorderSide(
@@ -94,6 +99,11 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                         ),
+                        style: themeMode.darkMode
+                            ? GoogleFonts.novaMono(
+                                color: Colors.grey, fontSize: 16)
+                            : GoogleFonts.novaMono(
+                                color: Colors.black54, fontSize: 16),
                       ),
                       const SizedBox(height: 16.0),
                       TextFormField(
@@ -103,7 +113,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           email: value!,
                         ),
                         decoration: InputDecoration(
-                          hintText: "Email",
+                          hintText: "email",
                           errorBorder: UnderlineInputBorder(
                             borderRadius: BorderRadius.circular(6.0),
                             borderSide: const BorderSide(
@@ -111,6 +121,11 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                         ),
+                        style: themeMode.darkMode
+                            ? GoogleFonts.novaMono(
+                                color: Colors.grey, fontSize: 16)
+                            : GoogleFonts.novaMono(
+                                color: Colors.black54, fontSize: 16),
                       ),
                       const SizedBox(height: 16.0),
                       TextFormField(
@@ -121,7 +136,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           password: value!,
                         ),
                         decoration: InputDecoration(
-                          hintText: "Password",
+                          hintText: "password",
                           errorBorder: UnderlineInputBorder(
                             borderRadius: BorderRadius.circular(6.0),
                             borderSide: const BorderSide(
@@ -129,6 +144,11 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                         ),
+                        style: themeMode.darkMode
+                            ? GoogleFonts.novaMono(
+                                color: Colors.grey, fontSize: 16)
+                            : GoogleFonts.novaMono(
+                                color: Colors.black54, fontSize: 16),
                       ),
                       const SizedBox(height: 32.0),
                       _isProcessing

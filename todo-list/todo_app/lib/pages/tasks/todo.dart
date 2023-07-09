@@ -3,10 +3,13 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:todo_app/utils/animations.dart';
 import 'package:todo_app/pages/navbar.dart';
 import 'package:todo_app/auth/user.dart';
 import 'package:todo_app/utils/utils.dart';
+
+import '../../main.dart';
 
 class TaskHolder {
   final String taskId;
@@ -218,6 +221,16 @@ class _TodoListState extends State<TodoList> {
             completed = false;
             completedList = [];
             completedBy = [];
+
+            timeLastSeen = now.millisecondsSinceEpoch ~/ 1000;
+            db
+                .collection("todo")
+                .doc(id)
+                .update({"timeLastSeen": timeLastSeen});
+            db
+                .collection("todo")
+                .doc(id)
+                .update({"secondsTilMidnight": secondsTilMidnight});
             print("Has been a midnight since last seen. Resetting completed.");
           }
         }
@@ -255,7 +268,7 @@ class _TodoListState extends State<TodoList> {
         customColor: Colors.grey,
         fontSize: 16,
         backButton: true,
-        pushToWhere: "home",
+        pushToWhere: "/",
       ),
       body: FutureBuilder(
           future: _seedTodoItems(),
@@ -263,6 +276,8 @@ class _TodoListState extends State<TodoList> {
               (BuildContext context, AsyncSnapshot<List<TodoItem>> snapshot) {
             List<Widget> widgetChildren;
             if (snapshot.hasData) {
+              var themeMode = Provider.of<DarkMode>(context);
+              ;
               return ListView(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 children: _todos
@@ -277,10 +292,12 @@ class _TodoListState extends State<TodoList> {
                         .isEmpty
                     ? [
                         Center(
-                            child: Text("Let's add a task!",
-                                style: GoogleFonts.novaMono(
-                                  color: Colors.grey,
-                                )))
+                            child: Text(
+                          "Let's add a task!",
+                          style: themeMode.darkMode
+                              ? GoogleFonts.novaMono(color: Colors.grey)
+                              : GoogleFonts.novaMono(color: Colors.black54),
+                        ))
                       ]
                     : _todos.map((Todo todo) {
                         return TodoItem(
@@ -329,13 +346,17 @@ class _TodoListState extends State<TodoList> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
+        var themeMode = Provider.of<DarkMode>(context);
+        ;
         return Theme(
           data: Theme.of(context)
               .copyWith(dialogBackgroundColor: Theme.of(context).canvasColor),
           child: AlertDialog(
             title: Text(
               'Add a todo',
-              style: GoogleFonts.novaMono(color: Colors.black87),
+              style: themeMode.darkMode
+                  ? GoogleFonts.novaMono(color: Colors.grey)
+                  : GoogleFonts.novaMono(color: Colors.black54),
             ),
             content: TextField(
               controller: _textFieldController,
@@ -345,7 +366,9 @@ class _TodoListState extends State<TodoList> {
                 hintText: 'Enter your todo',
               ),
               autofocus: true,
-              style: GoogleFonts.novaMono(color: Colors.black87),
+              style: themeMode.darkMode
+                  ? GoogleFonts.novaMono(color: Colors.grey)
+                  : GoogleFonts.novaMono(color: Colors.black54),
             ),
             actions: <Widget>[
               OutlinedButton(
@@ -444,7 +467,7 @@ class TodoItem extends StatelessWidget {
     }
   }
 
-  TextStyle? _getTextStyle() {
+  TextStyle? _getTextStyle(BuildContext context) {
     if (_myUserCompleted() ?? false) {
       return GoogleFonts.novaMono(
           color: Colors.black38,
@@ -452,19 +475,25 @@ class TodoItem extends StatelessWidget {
           fontWeight: FontWeight.w600,
           decoration: TextDecoration.lineThrough);
     } else {
-      return GoogleFonts.novaMono(
-          color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w600);
+      var themeMode = Provider.of<DarkMode>(context);
+      ;
+      return themeMode.darkMode
+          ? GoogleFonts.novaMono(
+              color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w600)
+          : GoogleFonts.novaMono(
+              color: Colors.black54, fontSize: 14, fontWeight: FontWeight.w600);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    var themeMode = Provider.of<DarkMode>(context);
     return ListTile(
       onTap: () {
         onTodoChanged(todo);
       },
       leading: Checkbox(
-        checkColor: Colors.greenAccent,
+        checkColor: Colors.greenAccent[400],
         activeColor: const Color.fromARGB(255, 178, 38, 83),
         value: _getCheckboxForUser(),
         onChanged: (value) {
@@ -477,7 +506,7 @@ class TodoItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(todo.name, style: _getTextStyle()),
+                Text(todo.name, style: _getTextStyle(context)),
                 todo.completedBy!.isNotEmpty
                     ? Text(
                         todo.completedBy!.join(", "),
@@ -486,8 +515,11 @@ class TodoItem extends StatelessWidget {
                       )
                     : Text(
                         "None completed yet",
-                        style: GoogleFonts.novaMono(
-                            color: Colors.grey, fontSize: 12),
+                        style: themeMode.darkMode
+                            ? GoogleFonts.novaMono(
+                                color: Colors.grey, fontSize: 12)
+                            : GoogleFonts.novaMono(
+                                color: Colors.black54, fontSize: 12),
                       ),
               ],
             ),

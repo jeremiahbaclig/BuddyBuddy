@@ -1,7 +1,10 @@
+import 'dart:js_interop';
+
 import "package:cloud_firestore/cloud_firestore.dart";
 import 'package:firebase_auth/firebase_auth.dart';
 import "package:flutter/material.dart";
 import "package:google_fonts/google_fonts.dart";
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:todo_app/utils/animations.dart';
 import 'package:todo_app/pages/navbar.dart';
@@ -10,6 +13,8 @@ import 'package:todo_app/pages/tasks/todo.dart';
 import 'package:todo_app/auth/user.dart';
 import 'package:todo_app/utils/utils.dart';
 import 'package:todo_app/utils/validator.dart';
+
+import '../../main.dart';
 
 typedef TaskDeleteCallback = void Function(Task task);
 
@@ -92,6 +97,10 @@ class _TaskListState extends State<TaskList> {
           continue;
         }
 
+        if (values.isUndefinedOrNull || keys.isUndefinedOrNull) {
+          continue;
+        }
+
         if (keys!.length < 2) {
           continue;
         }
@@ -123,6 +132,7 @@ class _TaskListState extends State<TaskList> {
 
   @override
   Widget build(BuildContext context) {
+    var themeMode = Provider.of<DarkMode>(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -137,11 +147,11 @@ class _TaskListState extends State<TaskList> {
                       fontWeight: FontWeight.w600,
                       fontSize: 16)),
               TextSpan(
-                  text: "Tasks",
-                  style: GoogleFonts.novaMono(
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16)),
+                text: "Tasks",
+                style: themeMode.darkMode
+                    ? GoogleFonts.novaMono(color: Colors.grey, fontSize: 16)
+                    : GoogleFonts.novaMono(color: Colors.black54, fontSize: 16),
+              ),
             ],
           ),
         ),
@@ -167,10 +177,11 @@ class _TaskListState extends State<TaskList> {
                     ? [
                         Center(
                             child: Text(
-                                "Let's start by creating a task list below!",
-                                style: GoogleFonts.novaMono(
-                                  color: Colors.grey,
-                                )))
+                          "Let's start by creating a task list below!",
+                          style: themeMode.darkMode
+                              ? GoogleFonts.novaMono(color: Colors.grey)
+                              : GoogleFonts.novaMono(color: Colors.black54),
+                        ))
                       ]
                     : _tasks.map((Task task) {
                         return TaskItem(
@@ -200,9 +211,16 @@ class _TaskListState extends State<TaskList> {
                 ),
               ];
             }
-            return Column(
-              children: widgetChildren,
-            );
+            if (widgetChildren.isNotEmpty) {
+              return Column(
+                children: widgetChildren,
+              );
+            } else {
+              return const Scaffold(
+                  body: Center(
+                      child: Text(
+                          'Data failed to load.\nRefresh the page and try again.')));
+            }
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _displayDialog(),
@@ -218,13 +236,16 @@ class _TaskListState extends State<TaskList> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
+        var themeMode = Provider.of<DarkMode>(context);
         return Theme(
           data: Theme.of(context)
               .copyWith(dialogBackgroundColor: Theme.of(context).canvasColor),
           child: AlertDialog(
             title: Text(
               "Create a list of tasks",
-              style: GoogleFonts.novaMono(color: Colors.black87),
+              style: themeMode.darkMode
+                  ? GoogleFonts.novaMono(color: Colors.grey)
+                  : GoogleFonts.novaMono(color: Colors.black54),
             ),
             content: TextField(
               controller: _textFieldController,
@@ -234,7 +255,9 @@ class _TaskListState extends State<TaskList> {
                 hintText: "Type here",
               ),
               autofocus: true,
-              style: GoogleFonts.novaMono(color: Colors.black87),
+              style: themeMode.darkMode
+                  ? GoogleFonts.novaMono(color: Colors.grey)
+                  : GoogleFonts.novaMono(color: Colors.black54),
             ),
             actions: <Widget>[
               OutlinedButton(
@@ -311,9 +334,12 @@ class TaskItem extends StatelessWidget {
       },
       color: const Color.fromARGB(255, 178, 38, 83),
     );
+    var themeMode = Provider.of<DarkMode>(context);
     AlertDialog alert = AlertDialog(
       title: Text("Are you sure?",
-          style: GoogleFonts.novaMono(color: Colors.grey)),
+          style: themeMode.darkMode
+              ? GoogleFonts.novaMono(color: Colors.grey)
+              : GoogleFonts.novaMono(color: Colors.black54)),
       actions: [
         cancelButton,
         continueButton,
@@ -332,13 +358,16 @@ class TaskItem extends StatelessWidget {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
+        var themeMode = Provider.of<DarkMode>(context);
         return Theme(
           data: Theme.of(context)
               .copyWith(dialogBackgroundColor: Theme.of(context).canvasColor),
           child: AlertDialog(
             title: Text(
               'Share this task list',
-              style: GoogleFonts.novaMono(color: Colors.black87),
+              style: themeMode.darkMode
+                  ? GoogleFonts.novaMono(color: Colors.grey)
+                  : GoogleFonts.novaMono(color: Colors.black54),
             ),
             content: Form(
               key: _formKey,
@@ -351,7 +380,9 @@ class TaskItem extends StatelessWidget {
                   hintText: 'Enter email',
                 ),
                 autofocus: true,
-                style: GoogleFonts.novaMono(color: Colors.black87),
+                style: themeMode.darkMode
+                    ? GoogleFonts.novaMono(color: Colors.grey)
+                    : GoogleFonts.novaMono(color: Colors.black54),
               ),
             ),
             actions: <Widget>[
@@ -382,7 +413,7 @@ class TaskItem extends StatelessWidget {
                     var acs = ActionCodeSettings(
                         // URL you want to redirect back to.
                         // URL must be whitelisted in the Firebase Console.
-                        url: 'https://buddybuddy-96544.web.app/',
+                        url: 'https://buddybuddy.com',
                         handleCodeInApp: true,
                         iOSBundleId: 'com.example.todoApp',
                         androidPackageName: 'com.example.todoApp',
@@ -425,6 +456,7 @@ class TaskItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var themeMode = Provider.of<DarkMode>(context);
     return ListTile(
       title: Row(children: <Widget>[
         Expanded(
@@ -444,7 +476,9 @@ class TaskItem extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: "Let's go! ",
-                      style: GoogleFonts.novaMono(color: Colors.grey),
+                      style: themeMode.darkMode
+                          ? GoogleFonts.novaMono(color: Colors.grey)
+                          : GoogleFonts.novaMono(color: Colors.black54),
                     ),
                     const WidgetSpan(
                       child: Icon(Icons.arrow_forward_rounded, size: 14),
@@ -460,7 +494,9 @@ class TaskItem extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: "Delete ",
-                      style: GoogleFonts.novaMono(color: Colors.grey),
+                      style: themeMode.darkMode
+                          ? GoogleFonts.novaMono(color: Colors.grey)
+                          : GoogleFonts.novaMono(color: Colors.black54),
                     ),
                     const WidgetSpan(
                       child: Icon(Icons.restore_from_trash_rounded, size: 14),
@@ -476,7 +512,9 @@ class TaskItem extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: "Share ",
-                      style: GoogleFonts.novaMono(color: Colors.grey),
+                      style: themeMode.darkMode
+                          ? GoogleFonts.novaMono(color: Colors.grey)
+                          : GoogleFonts.novaMono(color: Colors.black54),
                     ),
                     const WidgetSpan(
                       child: Icon(Icons.share, size: 14),
