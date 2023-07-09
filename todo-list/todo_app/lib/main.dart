@@ -72,10 +72,8 @@ class _TodoAppState extends State<TodoApp> {
                 _navigator = Navigator.of(context);
                 return WillPopScope(
                   onWillPop: () async {
-                    // Specify the page you want to navigate to when the back button is pressed
                     _navigator.pushReplacementNamed('welcome');
 
-                    // Return false to prevent the app from exiting
                     return false;
                   },
                   child: const HomeScreen(),

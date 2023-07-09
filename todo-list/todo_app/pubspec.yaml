@@ -29,3 +29,4 @@ flutter:
 
   assets:
     - lib/assets/bear.jpg
+    - lib/assets/user_icon.png

@@ -1,3 +1,5 @@
+import 'dart:js_interop';
+
 import "package:cloud_firestore/cloud_firestore.dart";
 import 'package:firebase_auth/firebase_auth.dart';
 import "package:flutter/material.dart";
@@ -92,6 +94,10 @@ class _TaskListState extends State<TaskList> {
           keys = doc.data().keys;
         } catch (e) {
           print("BAD DATA: ${e}");
+          continue;
+        }
+
+        if (values.isUndefinedOrNull || keys.isUndefinedOrNull) {
           continue;
         }
 
@@ -205,9 +211,16 @@ class _TaskListState extends State<TaskList> {
                 ),
               ];
             }
-            return Column(
-              children: widgetChildren,
-            );
+            if (widgetChildren.isNotEmpty) {
+              return Column(
+                children: widgetChildren,
+              );
+            } else {
+              return const Scaffold(
+                  body: Center(
+                      child: Text(
+                          'Data failed to load.\nRefresh the page and try again.')));
+            }
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _displayDialog(),
