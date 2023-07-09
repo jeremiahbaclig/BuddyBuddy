@@ -1,17 +1,15 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/auth/firebase_options.dart';
 import 'package:todo_app/pages/home/home.dart';
 import 'package:todo_app/pages/auth/login.dart';
 import 'package:todo_app/pages/navbar.dart';
-import 'package:todo_app/pages/home/profile.dart';
 import 'package:todo_app/pages/auth/registration.dart';
 import 'package:todo_app/pages/home/settings.dart';
 import 'package:todo_app/utils/side_bar.dart';
-import 'package:todo_app/pages/tasks/todo.dart';
 import 'package:todo_app/pages/welcome.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +30,9 @@ class TodoApp extends StatefulWidget {
 }
 
 class _TodoAppState extends State<TodoApp> {
-  var mainTheme = ThemeData.light();
+  var mainTheme = ThemeData.light().copyWith(
+    scaffoldBackgroundColor: Colors.grey[200],
+  );
   var darkTheme = ThemeData.dark();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -68,10 +68,14 @@ class _TodoAppState extends State<TodoApp> {
 } // ʕ •ᴥ•ʔ
 
 class DarkMode with ChangeNotifier {
-  bool darkMode = true;
+  bool darkMode = false;
 
-  changeMode() {
-    darkMode = !darkMode;
+  changeMode() async {
+    final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    final SharedPreferences prefs = await _prefs;
+    darkMode = (prefs.getBool('maybeDarkMode') ?? true);
+
+    prefs.setBool('maybeDarkMode', !darkMode);
     notifyListeners();
   }
 }

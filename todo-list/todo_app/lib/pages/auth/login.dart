@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:todo_app/utils/animations.dart';
 import 'package:todo_app/auth/auth.dart';
 import 'package:todo_app/pages/home/home.dart';
@@ -10,6 +11,8 @@ import 'package:todo_app/pages/home/profile.dart';
 import 'package:todo_app/pages/auth/registration.dart';
 import 'package:todo_app/utils/rounded_button.dart';
 import 'package:todo_app/utils/validator.dart';
+
+import '../../main.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -45,6 +48,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = Provider.of<DarkMode>(context);
+
     return GestureDetector(
       onTap: () {
         _focusEmail.unfocus();
@@ -69,8 +74,11 @@ class _LoginPageState extends State<LoginPage> {
                       padding: const EdgeInsets.only(bottom: 24.0),
                       child: Text(
                         'Login',
-                        style: GoogleFonts.novaMono(
-                            color: Colors.grey, fontSize: 24),
+                        style: themeMode.darkMode
+                            ? GoogleFonts.novaMono(
+                                color: Colors.grey, fontSize: 24)
+                            : GoogleFonts.novaMono(
+                                color: Colors.black54, fontSize: 24),
                       ),
                     ),
                     Form(
@@ -84,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
                               email: value!,
                             ),
                             decoration: InputDecoration(
-                              hintText: "Email",
+                              hintText: "email",
                               errorBorder: UnderlineInputBorder(
                                 borderRadius: BorderRadius.circular(6.0),
                                 borderSide: const BorderSide(
@@ -92,6 +100,11 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                             ),
+                            style: themeMode.darkMode
+                                ? GoogleFonts.novaMono(
+                                    color: Colors.grey, fontSize: 16)
+                                : GoogleFonts.novaMono(
+                                    color: Colors.black54, fontSize: 16),
                           ),
                           const SizedBox(height: 8.0),
                           TextFormField(
@@ -102,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
                               password: value!,
                             ),
                             decoration: InputDecoration(
-                              hintText: "Password",
+                              hintText: "password",
                               errorBorder: UnderlineInputBorder(
                                 borderRadius: BorderRadius.circular(6.0),
                                 borderSide: const BorderSide(
@@ -110,6 +123,11 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                             ),
+                            style: themeMode.darkMode
+                                ? GoogleFonts.novaMono(
+                                    color: Colors.grey, fontSize: 16)
+                                : GoogleFonts.novaMono(
+                                    color: Colors.black54, fontSize: 16),
                           ),
                           const SizedBox(height: 24.0),
                           _isProcessing
@@ -211,10 +229,12 @@ class _LoginPageState extends State<LoginPage> {
                                 children: <TextSpan>[
                                   TextSpan(
                                     text: 'Sign in with\n',
-                                    style: GoogleFonts.novaMono(
-                                      color: Colors.grey,
-                                      fontSize: 16,
-                                    ),
+                                    style: themeMode.darkMode
+                                        ? GoogleFonts.novaMono(
+                                            color: Colors.grey, fontSize: 16)
+                                        : GoogleFonts.novaMono(
+                                            color: Colors.black54,
+                                            fontSize: 16),
                                   ),
                                   const TextSpan(
                                     text: ' G',

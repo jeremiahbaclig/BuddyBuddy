@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:todo_app/auth/auth.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/pages/navbar.dart';
@@ -40,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var themeMode = Provider.of<DarkMode>(context);
     return Scaffold(
         appBar: CustomAppBar(
           title: "Buddy Buddy",
@@ -53,8 +55,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     text: TextSpan(
                       children: [
                         TextSpan(
-                            text: "My User ",
-                            style: GoogleFonts.novaMono(color: Colors.grey)),
+                          text: "My User ",
+                          style: themeMode.darkMode
+                              ? GoogleFonts.novaMono(color: Colors.grey)
+                              : GoogleFonts.novaMono(color: Colors.black54),
+                        ),
                         const WidgetSpan(
                           child: Icon(Icons.person_outline_rounded, size: 14),
                         ),
@@ -68,8 +73,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     text: TextSpan(
                       children: [
                         TextSpan(
-                            text: "Log Out ",
-                            style: GoogleFonts.novaMono(color: Colors.grey)),
+                          text: "Log Out ",
+                          style: themeMode.darkMode
+                              ? GoogleFonts.novaMono(color: Colors.grey)
+                              : GoogleFonts.novaMono(color: Colors.black54),
+                        ),
                         const WidgetSpan(
                           child: Icon(Icons.login_rounded, size: 14),
                         ),
