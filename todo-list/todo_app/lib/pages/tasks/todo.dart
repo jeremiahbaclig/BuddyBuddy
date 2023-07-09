@@ -231,6 +231,9 @@ class _TodoListState extends State<TodoList> {
                 .collection("todo")
                 .doc(id)
                 .update({"secondsTilMidnight": secondsTilMidnight});
+            db.collection("todo").doc(id).set({"completed": false});
+            db.collection("todo").doc(id).set({"completedList": []});
+            db.collection("todo").doc(id).set({"completedBy": []});
             print("Has been a midnight since last seen. Resetting completed.");
           }
         }
