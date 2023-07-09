@@ -59,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
         appBar: const CustomAppBar(
           title: "Buddy Buddy",
           backButton: true,
-          pushToWhere: "/",
+          pushToWhere: "welcome",
         ),
         body: FutureBuilder(
           future: _initializeFirebase(),

@@ -51,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
             RichText(
                 text: TextSpan(children: [
               TextSpan(
-                  text: "Errors authenticating...",
+                  text: "Sorry! We ran into some errors...",
                   style: themeMode.darkMode
                       ? GoogleFonts.novaMono(color: Colors.grey)
                       : GoogleFonts.novaMono(color: Colors.black54)),
@@ -128,11 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       } else if (value == 'logOut') {
                         Auth.signOut();
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (context) => TodoApp(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, "welcome");
                       }
                     },
                   ),

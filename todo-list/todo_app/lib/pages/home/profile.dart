@@ -117,11 +117,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 RoundedButton(
                   onPressed: () {
                     Auth.signOut();
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) => TodoApp(),
-                      ),
-                    );
+                    Navigator.pushNamed(context, "welcome");
                   },
                   title: "Log Out",
                   color: Colors.redAccent,
