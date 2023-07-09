@@ -33,7 +33,7 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: const CustomAppBar(
         title: "Profile",
         backButton: true,
-        pushToWhere: "home",
+        pushToWhere: "/",
       ),
       body: Center(
         child: Column(

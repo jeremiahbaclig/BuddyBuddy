@@ -268,7 +268,7 @@ class _TodoListState extends State<TodoList> {
         customColor: Colors.grey,
         fontSize: 16,
         backButton: true,
-        pushToWhere: "home",
+        pushToWhere: "/",
       ),
       body: FutureBuilder(
           future: _seedTodoItems(),
@@ -493,7 +493,7 @@ class TodoItem extends StatelessWidget {
         onTodoChanged(todo);
       },
       leading: Checkbox(
-        checkColor: Colors.greenAccent,
+        checkColor: Colors.greenAccent[400],
         activeColor: const Color.fromARGB(255, 178, 38, 83),
         value: _getCheckboxForUser(),
         onChanged: (value) {
